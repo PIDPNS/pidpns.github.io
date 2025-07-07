@@ -1,154 +1,131 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Load event data from JSON file
     loadEventData();
-    
-    // Initialize countdown timer
-    initCountdown();
-    
     // Generate QR code
     generateQRCode();
-    
-    // Initialize dark mode toggle
-    initDarkModeToggle();
+    // Initialize theme toggle
+    initThemeToggle();
+    // Initialize digital grid animation
+    initDigitalGrid();
 });
 
-/**
- * Load event data from external JSON file
- */
 function loadEventData() {
     fetch('event.json')
         .then(response => response.json())
         .then(data => {
-            // Update DOM elements with event data
             document.getElementById('eventTitle').textContent = data.title || 'Majlis Pelancaran Buku 2025';
             document.getElementById('eventDate').textContent = data.date || '7 Julai 2025';
             document.getElementById('eventLocation').textContent = data.location || 'Auditorium Utama';
             document.getElementById('eventHashtag').textContent = data.hashtag || '#PNSEvent2025';
-            
-            // Update countdown target date if provided
-            if (data.targetDate) {
-                initCountdown(new Date(data.targetDate));
-            }
-            
-            // Update document title
             document.title = data.title ? `${data.title} - Perpustakaan Negeri Sabah` : 'Perpustakaan Negeri Sabah - Event Backdrop';
         })
-        .catch(error => {
-            console.warn('Could not load event data:', error);
-            // Continue with default values if JSON file is not available
-        });
+        .catch(() => {});
 }
 
-/**
- * Initialize countdown timer
- * @param {Date} targetDate - The target date to count down to
- */
-function initCountdown(targetDate) {
-    // Default to a date in the future if not provided
-    const countdownTarget = targetDate || new Date('2025-07-07T09:00:00');
-    
-    // Update the countdown every second
-    function updateCountdown() {
-        const now = new Date();
-        const difference = countdownTarget - now;
-        
-        // If the target date is in the past, display zeros
-        if (difference < 0) {
-            document.getElementById('days').textContent = '00';
-            document.getElementById('hours').textContent = '00';
-            document.getElementById('minutes').textContent = '00';
-            document.getElementById('seconds').textContent = '00';
-            return;
-        }
-        
-        // Calculate time units
-        const days = Math.floor(difference / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((difference % (1000 * 60)) / 1000);
-        
-        // Update the DOM
-        document.getElementById('days').textContent = days.toString().padStart(2, '0');
-        document.getElementById('hours').textContent = hours.toString().padStart(2, '0');
-        document.getElementById('minutes').textContent = minutes.toString().padStart(2, '0');
-        document.getElementById('seconds').textContent = seconds.toString().padStart(2, '0');
-    }
-    
-    // Initial update
-    updateCountdown();
-    
-    // Update every second
-    setInterval(updateCountdown, 1000);
-}
-
-/**
- * Generate a QR code for the event
- */
 function generateQRCode() {
-    // Simple placeholder for QR code
-    // In a real implementation, you would use a library like qrcode.js
     const qrCodeContainer = document.getElementById('qrCodeContainer');
-    
-    // Create a placeholder QR code (simple grid pattern)
     const qrSize = 100;
     const qrCanvas = document.createElement('canvas');
     qrCanvas.width = qrSize;
     qrCanvas.height = qrSize;
     qrCanvas.style.width = '100%';
     qrCanvas.style.height = '100%';
-    
     const ctx = qrCanvas.getContext('2d');
     ctx.fillStyle = 'white';
     ctx.fillRect(0, 0, qrSize, qrSize);
-    ctx.fillStyle = 'black';
-    
-    // Draw a simple pattern (this is just a placeholder)
+    ctx.fillStyle = '#00ffae';
     const cellSize = 10;
     for (let y = 0; y < qrSize; y += cellSize) {
         for (let x = 0; x < qrSize; x += cellSize) {
-            // Random pattern for demonstration
             if (Math.random() > 0.7) {
                 ctx.fillRect(x, y, cellSize, cellSize);
             }
         }
     }
-    
-    // Add position markers (corners)
     ctx.fillRect(0, 0, cellSize * 3, cellSize * 3);
     ctx.fillRect(qrSize - cellSize * 3, 0, cellSize * 3, cellSize * 3);
     ctx.fillRect(0, qrSize - cellSize * 3, cellSize * 3, cellSize * 3);
-    
-    // Add white squares inside position markers
     ctx.fillStyle = 'white';
     ctx.fillRect(cellSize, cellSize, cellSize, cellSize);
     ctx.fillRect(qrSize - cellSize * 2, cellSize, cellSize, cellSize);
     ctx.fillRect(cellSize, qrSize - cellSize * 2, cellSize, cellSize);
-    
-    // Add the canvas to the container
     qrCodeContainer.appendChild(qrCanvas);
 }
 
-/**
- * Initialize dark mode toggle functionality
- */
-function initDarkModeToggle() {
-    const darkModeToggle = document.getElementById('darkModeToggle');
+function initThemeToggle() {
+    const toggleBtn = document.getElementById('darkModeToggle');
     const body = document.body;
-    
     // Check for saved preference
-    const isDarkMode = localStorage.getItem('darkMode') === 'true';
-    
-    // Apply saved preference
-    if (isDarkMode) {
-        body.classList.add('dark-mode');
+    let mode = localStorage.getItem('themeMode');
+    if (!mode) {
+        mode = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
     }
-    
-    // Toggle dark mode on button click
-    darkModeToggle.addEventListener('click', function() {
-        body.classList.toggle('dark-mode');
-        
-        // Save preference
-        const currentMode = body.classList.contains('dark-mode');
-        localStorage.setItem('darkMode', currentMode);
+    setThemeMode(mode);
+    toggleBtn.addEventListener('click', function() {
+        const isDark = body.classList.contains('dark-mode');
+        setThemeMode(isDark ? 'light' : 'dark');
     });
+}
+function setThemeMode(mode) {
+    const body = document.body;
+    if (mode === 'dark') {
+        body.classList.add('dark-mode');
+        body.classList.remove('light-mode');
+    } else {
+        body.classList.add('light-mode');
+        body.classList.remove('dark-mode');
+    }
+    localStorage.setItem('themeMode', mode);
+}
+
+function initDigitalGrid() {
+    const canvas = document.getElementById('digitalGrid');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let width = window.innerWidth;
+    let height = window.innerHeight;
+    canvas.width = width;
+    canvas.height = height;
+    function resize() {
+        width = window.innerWidth;
+        height = window.innerHeight;
+        canvas.width = width;
+        canvas.height = height;
+    }
+    window.addEventListener('resize', resize);
+    // Animation
+    let t = 0;
+    function drawGrid() {
+        ctx.clearRect(0, 0, width, height);
+        const gridSize = 60;
+        for (let x = 0; x < width; x += gridSize) {
+            for (let y = 0; y < height; y += gridSize) {
+                ctx.save();
+                ctx.strokeStyle = `rgba(0,255,174,${0.12 + 0.08 * Math.sin(t + x * 0.01 + y * 0.01)})`;
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+                ctx.lineTo(x + gridSize, y);
+                ctx.lineTo(x + gridSize, y + gridSize);
+                ctx.lineTo(x, y + gridSize);
+                ctx.closePath();
+                ctx.stroke();
+                ctx.restore();
+                // Digital dots
+                if ((x + y) % 120 === 0) {
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.arc(x + gridSize / 2, y + gridSize / 2, 2.5 + 2 * Math.abs(Math.sin(t + x * 0.02)), 0, 2 * Math.PI);
+                    ctx.fillStyle = `rgba(0,255,174,${0.18 + 0.12 * Math.abs(Math.cos(t + y * 0.02))})`;
+                    ctx.shadowColor = '#00ffae';
+                    ctx.shadowBlur = 8;
+                    ctx.fill();
+                    ctx.restore();
+                }
+            }
+        }
+        t += 0.03;
+        requestAnimationFrame(drawGrid);
+    }
+    drawGrid();
 }

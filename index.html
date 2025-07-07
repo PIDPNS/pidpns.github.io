@@ -3,69 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Perpustakaan Negeri Sabah - Event Backdrop</title>
+    <title>Perpustakaan Negeri Sabah - Futuristic Event Backdrop</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="backdrop">
-        <!-- Modern Futuristic Animated Backdrop -->
-        <div class="futuristic-bg">
-            <div class="animated-gradient"></div>
-            <div class="glass-panel"></div>
-            <div class="circuit-lines"></div>
-            <div class="glow-blur"></div>
-        </div>
-
-        <!-- Header with logo -->
-        <header>
+        <header class="header">
             <div class="logo-container">
                 <img src="assets/logo.png" alt="Perpustakaan Negeri Sabah Logo" class="logo">
             </div>
             <div class="theme-toggle">
                 <button id="darkModeToggle" aria-label="Toggle dark mode">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-                    </svg>
+                    <span class="toggle-icon"></span>
                 </button>
             </div>
         </header>
-
-        <!-- Main content area -->
-        <main>
-            <div class="event-container">
+        <main class="main-content">
+            <section class="event-info">
                 <h1 id="eventTitle" class="event-title">Majlis Pelancaran Buku 2025</h1>
                 <div class="event-details">
                     <p id="eventDate" class="event-date">7 Julai 2025</p>
                     <span class="separator">|</span>
                     <p id="eventLocation" class="event-location">Auditorium Utama</p>
                 </div>
-                
-                <!-- Futuristic digital design area -->
-                <div class="futuristic-overlay">
-                    <div class="glow-accent"></div>
-                    <div class="neon-frame"></div>
-                    <div class="geometric-shapes">
-                        <div class="hexagon"></div>
-                        <div class="triangle"></div>
-                    </div>
+            </section>
+            <section class="futuristic-visuals">
+                <canvas id="digitalGrid"></canvas>
+                <div class="neon-glow"></div>
+                <div class="neon-frame"></div>
+                <div class="floating-shapes">
+                    <div class="hexagon"></div>
+                    <div class="triangle"></div>
                 </div>
-            </div>
+            </section>
         </main>
-
-        <!-- Footer area -->
-        <footer>
+        <footer class="footer">
             <div class="footer-content">
-                <div id="qrCodeContainer" class="qr-code-container">
-                    <!-- QR code will be inserted here via JavaScript -->
-                </div>
+                <div id="qrCodeContainer" class="qr-code-container"></div>
                 <p id="eventHashtag" class="event-hashtag">#PNSEvent2025</p>
             </div>
         </footer>
     </div>
-
     <script src="script.js"></script>
 </body>
 </html>
