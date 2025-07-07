@@ -1,131 +1,135 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Load event data from JSON file
-    loadEventData();
-    // Generate QR code
-    generateQRCode();
-    // Initialize theme toggle
-    initThemeToggle();
-    // Initialize digital grid animation
-    initDigitalGrid();
-});
-
-function loadEventData() {
-    fetch('event.json')
-        .then(response => response.json())
-        .then(data => {
-            document.getElementById('eventTitle').textContent = data.title || 'Majlis Pelancaran Buku 2025';
-            document.getElementById('eventDate').textContent = data.date || '7 Julai 2025';
-            document.getElementById('eventLocation').textContent = data.location || 'Auditorium Utama';
-            document.getElementById('eventHashtag').textContent = data.hashtag || '#PNSEvent2025';
-            document.title = data.title ? `${data.title} - Perpustakaan Negeri Sabah` : 'Perpustakaan Negeri Sabah - Event Backdrop';
-        })
-        .catch(() => {});
-}
-
-function generateQRCode() {
-    const qrCodeContainer = document.getElementById('qrCodeContainer');
-    const qrSize = 100;
-    const qrCanvas = document.createElement('canvas');
-    qrCanvas.width = qrSize;
-    qrCanvas.height = qrSize;
-    qrCanvas.style.width = '100%';
-    qrCanvas.style.height = '100%';
-    const ctx = qrCanvas.getContext('2d');
-    ctx.fillStyle = 'white';
-    ctx.fillRect(0, 0, qrSize, qrSize);
-    ctx.fillStyle = '#00ffae';
-    const cellSize = 10;
-    for (let y = 0; y < qrSize; y += cellSize) {
-        for (let x = 0; x < qrSize; x += cellSize) {
-            if (Math.random() > 0.7) {
-                ctx.fillRect(x, y, cellSize, cellSize);
-            }
-        }
-    }
-    ctx.fillRect(0, 0, cellSize * 3, cellSize * 3);
-    ctx.fillRect(qrSize - cellSize * 3, 0, cellSize * 3, cellSize * 3);
-    ctx.fillRect(0, qrSize - cellSize * 3, cellSize * 3, cellSize * 3);
-    ctx.fillStyle = 'white';
-    ctx.fillRect(cellSize, cellSize, cellSize, cellSize);
-    ctx.fillRect(qrSize - cellSize * 2, cellSize, cellSize, cellSize);
-    ctx.fillRect(cellSize, qrSize - cellSize * 2, cellSize, cellSize);
-    qrCodeContainer.appendChild(qrCanvas);
-}
-
-function initThemeToggle() {
-    const toggleBtn = document.getElementById('darkModeToggle');
-    const body = document.body;
-    // Check for saved preference
-    let mode = localStorage.getItem('themeMode');
-    if (!mode) {
-        mode = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    }
-    setThemeMode(mode);
-    toggleBtn.addEventListener('click', function() {
-        const isDark = body.classList.contains('dark-mode');
-        setThemeMode(isDark ? 'light' : 'dark');
-    });
-}
-function setThemeMode(mode) {
-    const body = document.body;
+  // Theme toggle
+  const themeToggle = document.getElementById('themeToggle');
+  const body = document.body;
+  // Load saved theme or system preference
+  let mode = localStorage.getItem('themeMode');
+  if (!mode) {
+    mode = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+  setThemeMode(mode);
+  themeToggle.addEventListener('click', function() {
+    setThemeMode(body.classList.contains('dark-mode') ? 'light' : 'dark');
+  });
+  function setThemeMode(mode) {
     if (mode === 'dark') {
-        body.classList.add('dark-mode');
-        body.classList.remove('light-mode');
+      body.classList.add('dark-mode');
     } else {
-        body.classList.add('light-mode');
-        body.classList.remove('dark-mode');
+      body.classList.remove('dark-mode');
     }
     localStorage.setItem('themeMode', mode);
-}
+  }
 
-function initDigitalGrid() {
-    const canvas = document.getElementById('digitalGrid');
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    let width = window.innerWidth;
-    let height = window.innerHeight;
-    canvas.width = width;
-    canvas.height = height;
-    function resize() {
-        width = window.innerWidth;
-        height = window.innerHeight;
-        canvas.width = width;
-        canvas.height = height;
+  // Digital circuit lines animation
+  const circuitCanvas = document.getElementById('circuitLines');
+  if (circuitCanvas) {
+    let width = circuitCanvas.width = circuitCanvas.offsetWidth;
+    let height = circuitCanvas.height = circuitCanvas.offsetHeight;
+    const ctx = circuitCanvas.getContext('2d');
+    function resizeCircuit() {
+      width = circuitCanvas.width = circuitCanvas.offsetWidth;
+      height = circuitCanvas.height = circuitCanvas.offsetHeight;
     }
-    window.addEventListener('resize', resize);
-    // Animation
+    window.addEventListener('resize', resizeCircuit);
+    // Generate random circuit lines
+    function randomLines(count) {
+      const lines = [];
+      for (let i = 0; i < count; i++) {
+        const x = Math.random() * width;
+        const y = Math.random() * height;
+        const len = 120 + Math.random() * 180;
+        const horizontal = Math.random() > 0.5;
+        lines.push({
+          x, y, len, horizontal,
+          turn: Math.random() > 0.5
+        });
+      }
+      return lines;
+    }
+    let lines = randomLines(32);
     let t = 0;
-    function drawGrid() {
-        ctx.clearRect(0, 0, width, height);
-        const gridSize = 60;
-        for (let x = 0; x < width; x += gridSize) {
-            for (let y = 0; y < height; y += gridSize) {
-                ctx.save();
-                ctx.strokeStyle = `rgba(0,255,174,${0.12 + 0.08 * Math.sin(t + x * 0.01 + y * 0.01)})`;
-                ctx.lineWidth = 1.5;
-                ctx.beginPath();
-                ctx.moveTo(x, y);
-                ctx.lineTo(x + gridSize, y);
-                ctx.lineTo(x + gridSize, y + gridSize);
-                ctx.lineTo(x, y + gridSize);
-                ctx.closePath();
-                ctx.stroke();
-                ctx.restore();
-                // Digital dots
-                if ((x + y) % 120 === 0) {
-                    ctx.save();
-                    ctx.beginPath();
-                    ctx.arc(x + gridSize / 2, y + gridSize / 2, 2.5 + 2 * Math.abs(Math.sin(t + x * 0.02)), 0, 2 * Math.PI);
-                    ctx.fillStyle = `rgba(0,255,174,${0.18 + 0.12 * Math.abs(Math.cos(t + y * 0.02))})`;
-                    ctx.shadowColor = '#00ffae';
-                    ctx.shadowBlur = 8;
-                    ctx.fill();
-                    ctx.restore();
-                }
-            }
+    function drawCircuit() {
+      ctx.clearRect(0, 0, width, height);
+      // Draw lines
+      for (const line of lines) {
+        ctx.save();
+        ctx.strokeStyle = `rgba(67,233,123,0.18)`;
+        ctx.shadowColor = '#43e97b';
+        ctx.shadowBlur = 8 + 6 * Math.abs(Math.sin(t/2));
+        ctx.lineWidth = 2.2;
+        ctx.beginPath();
+        ctx.moveTo(line.x, line.y);
+        if (line.turn) {
+          // L-shape
+          if (line.horizontal) {
+            ctx.lineTo(line.x + line.len * 0.6, line.y);
+            ctx.lineTo(line.x + line.len * 0.6, line.y + line.len * 0.4);
+          } else {
+            ctx.lineTo(line.x, line.y + line.len * 0.6);
+            ctx.lineTo(line.x + line.len * 0.4, line.y + line.len * 0.6);
+          }
+        } else {
+          if (line.horizontal) {
+            ctx.lineTo(line.x + line.len, line.y);
+          } else {
+            ctx.lineTo(line.x, line.y + line.len);
+          }
         }
-        t += 0.03;
-        requestAnimationFrame(drawGrid);
+        ctx.stroke();
+        ctx.restore();
+        // Draw circuit nodes
+        ctx.save();
+        ctx.beginPath();
+        let nodeX = line.horizontal ? line.x + line.len * (line.turn ? 0.6 : 1) : line.x;
+        let nodeY = line.horizontal ? line.y : line.y + line.len * (line.turn ? 0.6 : 1);
+        ctx.arc(nodeX, nodeY, 6 + 2 * Math.abs(Math.sin(t)), 0, 2 * Math.PI);
+        ctx.fillStyle = `rgba(56,142,60,${0.18 + 0.12 * Math.abs(Math.sin(t))})`;
+        ctx.shadowColor = '#43e97b';
+        ctx.shadowBlur = 16 + 8 * Math.abs(Math.sin(t));
+        ctx.fill();
+        ctx.restore();
+      }
+      t += 0.02;
+      requestAnimationFrame(drawCircuit);
     }
-    drawGrid();
-}
+    drawCircuit();
+  }
+
+  // Event info slider auto-advance
+  const slider = document.querySelector('.event-slider');
+  if (slider) {
+    const slides = Array.from(slider.querySelectorAll('.event-slide'));
+    let current = 0;
+    function showSlide(idx) {
+      slides.forEach((slide, i) => {
+        slide.classList.toggle('active', i === idx);
+      });
+    }
+    showSlide(current);
+    setInterval(() => {
+      current = (current + 1) % slides.length;
+      showSlide(current);
+    }, 5000);
+  }
+
+  // Current date and time updater
+  function updateDatetime() {
+    const timeEl = document.getElementById('currentTime');
+    const dateEl = document.getElementById('currentDate');
+    if (!timeEl || !dateEl) return;
+    const now = new Date();
+    const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    const day = days[now.getDay()];
+    const date = now.getDate().toString().padStart(2, '0');
+    const month = months[now.getMonth()];
+    const year = now.getFullYear();
+    const hours = now.getHours().toString().padStart(2, '0');
+    const minutes = now.getMinutes().toString().padStart(2, '0');
+    const seconds = now.getSeconds().toString().padStart(2, '0');
+    timeEl.textContent = `${hours}:${minutes}:${seconds}`;
+    dateEl.textContent = `${day}, ${date} ${month} ${year}`;
+  }
+  updateDatetime();
+  setInterval(updateDatetime, 1000);
+});
