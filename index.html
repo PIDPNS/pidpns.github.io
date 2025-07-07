@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perpustakaan Negeri Sabah - Event Backdrop</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="backdrop">
+        <!-- Animated background elements -->
+        <div class="particles-container">
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+        </div>
+
+        <!-- Header with logo -->
+        <header>
+            <div class="logo-container">
+                <img src="assets/logo.png" alt="Perpustakaan Negeri Sabah Logo" class="logo">
+            </div>
+            <div class="theme-toggle">
+                <button id="darkModeToggle" aria-label="Toggle dark mode">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main content area -->
+        <main>
+            <div class="event-container">
+                <h1 id="eventTitle" class="event-title">Majlis Pelancaran Buku 2025</h1>
+                <div class="event-details">
+                    <p id="eventDate" class="event-date">7 Julai 2025</p>
+                    <span class="separator">|</span>
+                    <p id="eventLocation" class="event-location">Auditorium Utama</p>
+                </div>
+                
+                <!-- Optional countdown timer -->
+                <div class="countdown-container">
+                    <div id="countdown" class="countdown">
+                        <div class="countdown-item">
+                            <span id="days">00</span>
+                            <span class="countdown-label">Hari</span>
+                        </div>
+                        <div class="countdown-item">
+                            <span id="hours">00</span>
+                            <span class="countdown-label">Jam</span>
+                        </div>
+                        <div class="countdown-item">
+                            <span id="minutes">00</span>
+                            <span class="countdown-label">Minit</span>
+                        </div>
+                        <div class="countdown-item">
+                            <span id="seconds">00</span>
+                            <span class="countdown-label">Saat</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer area -->
+        <footer>
+            <div class="footer-content">
+                <div id="qrCodeContainer" class="qr-code-container">
+                    <!-- QR code will be inserted here via JavaScript -->
+                </div>
+                <p id="eventHashtag" class="event-hashtag">#PNSEvent2025</p>
+            </div>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
