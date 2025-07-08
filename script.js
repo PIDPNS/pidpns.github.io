@@ -261,6 +261,12 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
+  // --- Supabase Integration ---
+  // Replace with your actual Supabase project URL and anon key
+  const SUPABASE_URL = 'https://supabase.com/dashboard/project/amxvmnzhwehxmnwzzaoy';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFteHZtbnpod2VoeG1ud3p6YW95Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE5NTc5NDksImV4cCI6MjA2NzUzMzk0OX0.Vedmvf0QnCEh5TdgarY48BW2vrBgmYayQ2c-fcKFHlo';
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
   // Message system functionality
   const messageForm = document.getElementById('messageForm');
   const messageInput = document.getElementById('messageInput');
@@ -288,9 +294,32 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
+  // --- Supabase Send Message ---
+  async function sendMessageToSupabase(author, content) {
+    // Show loading state (disable button)
+    const submitBtn = messageForm.querySelector('.form-submit');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Sending...';
+
+    // Insert message into Supabase
+    const { error } = await supabase.from('messages').insert([
+      { author, content }
+    ]);
+
+    // Restore button
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Send Message';
+
+    if (error) {
+      alert('Failed to send message. Please try again.');
+      return false;
+    }
+    return true;
+  }
+
   // Form submission
   if (messageForm) {
-    messageForm.addEventListener('submit', function(e) {
+    messageForm.addEventListener('submit', async function(e) {
       e.preventDefault();
       
       const userName = userSelect.value;
@@ -300,13 +329,16 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
       }
 
-      // Show message popup
-      showMessagePopup(userName, message);
-      
-      // Reset form
-      messageForm.reset();
-      charCount.textContent = '0';
-      charCount.style.color = 'var(--muted)';
+      // Send to Supabase
+      const ok = await sendMessageToSupabase(userName, message);
+      if (ok) {
+        // Reset form
+        messageForm.reset();
+        charCount.textContent = '0';
+        charCount.style.color = 'var(--muted)';
+        // Show success popup
+        showMessagePopup(userName, 'Message sent!');
+      }
     });
   }
 
