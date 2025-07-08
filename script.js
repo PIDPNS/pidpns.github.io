@@ -379,6 +379,10 @@ document.addEventListener('DOMContentLoaded', function() {
       </div>
     `;
     messagesPopups.appendChild(popup);
+    // Trigger bounce animation
+    setTimeout(() => {
+      popup.classList.add('bounce');
+    }, 10);
     // Remove after 5 seconds
     setTimeout(() => {
       popup.classList.remove('show');
@@ -421,7 +425,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // --- Screen change logic for real-time messages ---
   function handleScreenChangeForMessages(screenName) {
     if (screenName === 'messages') {
-      fetchAndShowRecentMessages();
+      if (messagesPopups) messagesPopups.innerHTML = '';
       subscribeToMessages();
     } else {
       unsubscribeFromMessages();

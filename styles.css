@@ -1292,3 +1292,14 @@ body.dark-mode .form-textarea {
     font-size: 0.85rem;
   }
 }
+
+@keyframes popup-bounce {
+  0%   { transform: scale(0.8); opacity: 0.7; }
+  60%  { transform: scale(1.05); opacity: 1; }
+  80%  { transform: scale(0.97); }
+  100% { transform: scale(1); }
+}
+
+.message-popup.bounce {
+  animation: popup-bounce 0.5s cubic-bezier(.4,2,.6,1);
+}
