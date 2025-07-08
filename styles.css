@@ -1327,3 +1327,26 @@ body.dark-mode .form-textarea {
 .messages-container {
   position: relative;
 }
+
+.improved-instructions {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 1.2em 0 1.2em 0;
+}
+
+.status-text .main-instruction {
+  font-size: 1.13em;
+  font-weight: 500;
+  margin-bottom: 0.5em;
+  display: block;
+}
+
+.status-text .instruction-note {
+  font-size: 0.97em;
+  color: var(--muted);
+  font-style: italic;
+  margin-top: 0.5em;
+  display: block;
+}

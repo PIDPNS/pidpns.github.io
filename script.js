@@ -357,7 +357,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Hide popup after 5 seconds
     setTimeout(() => {
       messagePopup.classList.remove('show');
-    }, 5000);
+    }, 7000);
   }
 
   // --- Real-time Message Display ---
@@ -383,23 +383,26 @@ document.addEventListener('DOMContentLoaded', function() {
         <div class="message-text">${content}</div>
       </div>
     `;
-    messagesPopups.appendChild(popup);
-    // Trigger bounce animation
+    // Delay showing the popup until fade-out is mostly complete
     setTimeout(() => {
-      popup.classList.add('bounce');
-    }, 10);
-    // Remove after 5 seconds
-    setTimeout(() => {
-      popup.classList.remove('show');
+      messagesPopups.appendChild(popup);
+      // Trigger bounce animation
       setTimeout(() => {
-        popup.remove();
-        // If no more popups, fade title and status back in
-        if (messagesPopups && messagesPopups.children.length === 0) {
-          if (liveTitle) liveTitle.classList.remove('live-messages-fade');
-          if (status) status.classList.remove('live-messages-fade');
-        }
-      }, 500);
-    }, 5000);
+        popup.classList.add('bounce');
+      }, 10);
+      // Remove after 5 seconds (plus delay)
+      setTimeout(() => {
+        popup.classList.remove('show');
+        setTimeout(() => {
+          popup.remove();
+          // If no more popups, fade title and status back in
+          if (messagesPopups && messagesPopups.children.length === 0) {
+            if (liveTitle) liveTitle.classList.remove('live-messages-fade');
+            if (status) status.classList.remove('live-messages-fade');
+          }
+        }, 500);
+      }, 5000);
+    }, 1100); // 1.1s delay to match fade out
   }
 
   async function fetchAndShowRecentMessages() {
