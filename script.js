@@ -261,6 +261,115 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
+  // Message system functionality
+  const messageForm = document.getElementById('messageForm');
+  const messageInput = document.getElementById('messageInput');
+  const userSelect = document.getElementById('userSelect');
+  const charCount = document.getElementById('charCount');
+  const messagePopup = document.getElementById('messagePopup');
+  const messageAuthor = document.getElementById('messageAuthor');
+  const messageText = document.getElementById('messageText');
+  const messageTime = document.getElementById('messageTime');
+
+  // Character counter
+  if (messageInput) {
+    messageInput.addEventListener('input', function() {
+      const count = this.value.length;
+      charCount.textContent = count;
+      
+      // Change color when approaching limit
+      if (count > 180) {
+        charCount.style.color = '#FF3B30';
+      } else if (count > 150) {
+        charCount.style.color = '#FF9500';
+      } else {
+        charCount.style.color = 'var(--muted)';
+      }
+    });
+  }
+
+  // Form submission
+  if (messageForm) {
+    messageForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const userName = userSelect.value;
+      const message = messageInput.value.trim();
+      
+      if (!userName || !message) {
+        return;
+      }
+
+      // Show message popup
+      showMessagePopup(userName, message);
+      
+      // Reset form
+      messageForm.reset();
+      charCount.textContent = '0';
+      charCount.style.color = 'var(--muted)';
+    });
+  }
+
+  // Message popup functionality
+  function showMessagePopup(author, text) {
+    if (!messagePopup || !messageAuthor || !messageText || !messageTime) return;
+
+    // Update popup content
+    messageAuthor.textContent = author;
+    messageText.textContent = text;
+    messageTime.textContent = 'Just now';
+
+    // Show popup
+    messagePopup.classList.add('show');
+
+    // Hide popup after 5 seconds
+    setTimeout(() => {
+      messagePopup.classList.remove('show');
+    }, 5000);
+  }
+
+  // Demo messages for testing
+  const demoMessages = [
+    { author: 'Dr. Aisyah Rahman', text: 'Welcome everyone to the Digital Transformation Summit 2025!' },
+    { author: 'Ahmad Zulkarnain', text: 'Great presentation on AI integration strategies.' },
+    { author: 'Sarah Lim', text: 'Looking forward to the networking session later.' },
+    { author: 'Mohammed Ali', text: 'The workshop on cloud migration was very informative.' },
+    { author: 'Lisa Chen', text: 'Can\'t wait to implement these digital solutions.' }
+  ];
+
+  // Auto-show demo messages on messages screen
+  let demoMessageInterval;
+  
+  function startDemoMessages() {
+    if (demoMessageInterval) {
+      clearInterval(demoMessageInterval);
+    }
+    
+    demoMessageInterval = setInterval(() => {
+      if (currentScreen === 'messages') {
+        const randomMessage = demoMessages[Math.floor(Math.random() * demoMessages.length)];
+        showMessagePopup(randomMessage.author, randomMessage.text);
+      }
+    }, 8000); // Show demo message every 8 seconds
+  }
+
+  // Start demo messages
+  startDemoMessages();
+
+  // Update demo messages when screen changes
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', function() {
+      const screenName = this.dataset.screen;
+      if (screenName === 'messages') {
+        startDemoMessages();
+      } else {
+        if (demoMessageInterval) {
+          clearInterval(demoMessageInterval);
+        }
+      }
+    });
+  });
+
   // Current date and time updater
   function updateDatetime() {
     const timeEl = document.getElementById('currentTime');
