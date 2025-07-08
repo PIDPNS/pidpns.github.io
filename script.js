@@ -360,47 +360,88 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 5000);
   }
 
-  // Demo messages for testing
-  const demoMessages = [
-    { author: 'Dr. Aisyah Rahman', text: 'Welcome everyone to the Digital Transformation Summit 2025!' },
-    { author: 'Ahmad Zulkarnain', text: 'Great presentation on AI integration strategies.' },
-    { author: 'Sarah Lim', text: 'Looking forward to the networking session later.' },
-    { author: 'Mohammed Ali', text: 'The workshop on cloud migration was very informative.' },
-    { author: 'Lisa Chen', text: 'Can\'t wait to implement these digital solutions.' }
-  ];
+  // --- Real-time Message Display ---
+  const messagesPopups = document.getElementById('messagesPopups');
+  let supabaseMessagesSubscription = null;
 
-  // Auto-show demo messages on messages screen
-  let demoMessageInterval;
-  
-  function startDemoMessages() {
-    if (demoMessageInterval) {
-      clearInterval(demoMessageInterval);
-    }
-    
-    demoMessageInterval = setInterval(() => {
-      if (currentScreen === 'messages') {
-        const randomMessage = demoMessages[Math.floor(Math.random() * demoMessages.length)];
-        showMessagePopup(randomMessage.author, randomMessage.text);
-      }
-    }, 8000); // Show demo message every 8 seconds
+  function renderMessagePopup({ author, content, created_at }) {
+    if (!messagesPopups) return;
+    // Create popup element
+    const popup = document.createElement('div');
+    popup.className = 'message-popup show';
+    popup.innerHTML = `
+      <div class="message-content">
+        <div class="message-header">
+          <span class="message-author">${author}</span>
+          <span class="message-time">${created_at ? new Date(created_at).toLocaleTimeString() : 'Just now'}</span>
+        </div>
+        <div class="message-text">${content}</div>
+      </div>
+    `;
+    messagesPopups.appendChild(popup);
+    // Remove after 5 seconds
+    setTimeout(() => {
+      popup.classList.remove('show');
+      setTimeout(() => popup.remove(), 500);
+    }, 5000);
   }
 
-  // Start demo messages
-  startDemoMessages();
+  async function fetchAndShowRecentMessages() {
+    if (!messagesPopups) return;
+    messagesPopups.innerHTML = '';
+    // Fetch last 5 messages, newest first
+    const { data, error } = await supabase
+      .from('messages')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(5);
+    if (data) {
+      // Show newest first (top)
+      data.reverse().forEach(msg => renderMessagePopup(msg));
+    }
+  }
 
-  // Update demo messages when screen changes
-  document.querySelectorAll('.nav-item').forEach(item => {
+  function subscribeToMessages() {
+    if (supabaseMessagesSubscription) return;
+    supabaseMessagesSubscription = supabase
+      .channel('public:messages')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
+        renderMessagePopup(payload.new);
+      })
+      .subscribe();
+  }
+
+  function unsubscribeFromMessages() {
+    if (supabaseMessagesSubscription) {
+      supabase.removeChannel(supabaseMessagesSubscription);
+      supabaseMessagesSubscription = null;
+    }
+  }
+
+  // --- Screen change logic for real-time messages ---
+  function handleScreenChangeForMessages(screenName) {
+    if (screenName === 'messages') {
+      fetchAndShowRecentMessages();
+      subscribeToMessages();
+    } else {
+      unsubscribeFromMessages();
+      if (messagesPopups) messagesPopups.innerHTML = '';
+    }
+  }
+
+  // Patch nav click handlers to call handleScreenChangeForMessages
+  const navItems = document.querySelectorAll('.nav-item');
+  navItems.forEach(item => {
     item.addEventListener('click', function() {
       const screenName = this.dataset.screen;
-      if (screenName === 'messages') {
-        startDemoMessages();
-      } else {
-        if (demoMessageInterval) {
-          clearInterval(demoMessageInterval);
-        }
-      }
+      handleScreenChangeForMessages(screenName);
     });
   });
+
+  // If page loads on messages screen, start subscription
+  if (document.querySelector('.event-slide.active[data-screen="messages"]')) {
+    handleScreenChangeForMessages('messages');
+  }
 
   // Current date and time updater
   function updateDatetime() {
