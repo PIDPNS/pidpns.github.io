@@ -1303,3 +1303,9 @@ body.dark-mode .form-textarea {
 .message-popup.bounce {
   animation: popup-bounce 0.5s cubic-bezier(.4,2,.6,1);
 }
+
+.live-messages-fade {
+  opacity: 0;
+  transition: opacity 0.5s cubic-bezier(.4,2,.6,1);
+  pointer-events: none;
+}

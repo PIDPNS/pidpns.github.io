@@ -366,6 +366,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function renderMessagePopup({ author, content, created_at }) {
     if (!messagesPopups) return;
+    // Fade out title and status
+    const liveTitle = document.getElementById('liveMessagesTitle');
+    const status = document.getElementById('messagesStatus');
+    if (liveTitle) liveTitle.classList.add('live-messages-fade');
+    if (status) status.classList.add('live-messages-fade');
     // Create popup element
     const popup = document.createElement('div');
     popup.className = 'message-popup show';
@@ -386,7 +391,14 @@ document.addEventListener('DOMContentLoaded', function() {
     // Remove after 5 seconds
     setTimeout(() => {
       popup.classList.remove('show');
-      setTimeout(() => popup.remove(), 500);
+      setTimeout(() => {
+        popup.remove();
+        // If no more popups, fade title and status back in
+        if (messagesPopups && messagesPopups.children.length === 0) {
+          if (liveTitle) liveTitle.classList.remove('live-messages-fade');
+          if (status) status.classList.remove('live-messages-fade');
+        }
+      }, 500);
     }, 5000);
   }
 
