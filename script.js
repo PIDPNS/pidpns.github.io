@@ -20,79 +20,177 @@ document.addEventListener('DOMContentLoaded', function() {
     localStorage.setItem('themeMode', mode);
   }
 
-  // Digital circuit lines animation
+  // Professional floating data particles animation
   const circuitCanvas = document.getElementById('circuitLines');
   if (circuitCanvas) {
     let width = circuitCanvas.width = circuitCanvas.offsetWidth;
     let height = circuitCanvas.height = circuitCanvas.offsetHeight;
     const ctx = circuitCanvas.getContext('2d');
+    
     function resizeCircuit() {
       width = circuitCanvas.width = circuitCanvas.offsetWidth;
       height = circuitCanvas.height = circuitCanvas.offsetHeight;
     }
     window.addEventListener('resize', resizeCircuit);
-    // Generate random circuit lines
-    function randomLines(count) {
-      const lines = [];
-      for (let i = 0; i < count; i++) {
-        const x = Math.random() * width;
-        const y = Math.random() * height;
-        const len = 120 + Math.random() * 180;
-        const horizontal = Math.random() > 0.5;
-        lines.push({
-          x, y, len, horizontal,
-          turn: Math.random() > 0.5
-        });
+
+    // Particle class for data elements
+    class DataParticle {
+      constructor() {
+        this.reset();
       }
-      return lines;
-    }
-    let lines = randomLines(32);
-    let t = 0;
-    function drawCircuit() {
-      ctx.clearRect(0, 0, width, height);
-      // Draw lines
-      for (const line of lines) {
-        ctx.save();
-        ctx.strokeStyle = `rgba(67,233,123,0.18)`;
-        ctx.shadowColor = '#43e97b';
-        ctx.shadowBlur = 8 + 6 * Math.abs(Math.sin(t/2));
-        ctx.lineWidth = 2.2;
-        ctx.beginPath();
-        ctx.moveTo(line.x, line.y);
-        if (line.turn) {
-          // L-shape
-          if (line.horizontal) {
-            ctx.lineTo(line.x + line.len * 0.6, line.y);
-            ctx.lineTo(line.x + line.len * 0.6, line.y + line.len * 0.4);
-          } else {
-            ctx.lineTo(line.x, line.y + line.len * 0.6);
-            ctx.lineTo(line.x + line.len * 0.4, line.y + line.len * 0.6);
-          }
-        } else {
-          if (line.horizontal) {
-            ctx.lineTo(line.x + line.len, line.y);
-          } else {
-            ctx.lineTo(line.x, line.y + line.len);
-          }
+
+      reset() {
+        this.x = Math.random() * width;
+        this.y = Math.random() * height;
+        this.vx = (Math.random() - 0.5) * 0.5;
+        this.vy = (Math.random() - 0.5) * 0.5;
+        this.size = Math.random() * 3 + 1;
+        this.opacity = Math.random() * 0.6 + 0.2;
+        this.type = Math.floor(Math.random() * 3); // 0: circle, 1: square, 2: hexagon
+        this.pulse = Math.random() * Math.PI * 2;
+        this.pulseSpeed = Math.random() * 0.02 + 0.01;
+      }
+
+      update() {
+        this.x += this.vx;
+        this.y += this.vy;
+        this.pulse += this.pulseSpeed;
+
+        // Wrap around edges
+        if (this.x < -10) this.x = width + 10;
+        if (this.x > width + 10) this.x = -10;
+        if (this.y < -10) this.y = height + 10;
+        if (this.y > height + 10) this.y = -10;
+
+        // Occasional direction change
+        if (Math.random() < 0.005) {
+          this.vx = (Math.random() - 0.5) * 0.5;
+          this.vy = (Math.random() - 0.5) * 0.5;
         }
+      }
+
+      draw() {
+        ctx.save();
+        const pulseFactor = 0.8 + 0.2 * Math.sin(this.pulse);
+        const currentSize = this.size * pulseFactor;
+        const currentOpacity = this.opacity * pulseFactor;
+
+        // Set color based on theme
+        const isDark = body.classList.contains('dark-mode');
+        const primaryColor = isDark ? '#0A84FF' : '#007AFF';
+        const accentColor = isDark ? '#5E5CE6' : '#5856D6';
+
+        ctx.fillStyle = `rgba(${isDark ? '10,132,255' : '0,122,255'}, ${currentOpacity})`;
+        ctx.strokeStyle = `rgba(${isDark ? '94,92,230' : '88,86,214'}, ${currentOpacity * 0.6})`;
+        ctx.lineWidth = 1;
+        ctx.shadowColor = primaryColor;
+        ctx.shadowBlur = 8 * pulseFactor;
+
+        ctx.beginPath();
+        
+        switch (this.type) {
+          case 0: // Circle
+            ctx.arc(this.x, this.y, currentSize, 0, Math.PI * 2);
+            break;
+          case 1: // Square
+            const halfSize = currentSize / 2;
+            ctx.rect(this.x - halfSize, this.y - halfSize, currentSize, currentSize);
+            break;
+          case 2: // Hexagon
+            for (let i = 0; i < 6; i++) {
+              const angle = (i * Math.PI) / 3;
+              const px = this.x + currentSize * Math.cos(angle);
+              const py = this.y + currentSize * Math.sin(angle);
+              if (i === 0) ctx.moveTo(px, py);
+              else ctx.lineTo(px, py);
+            }
+            ctx.closePath();
+            break;
+        }
+
+        ctx.fill();
         ctx.stroke();
         ctx.restore();
-        // Draw circuit nodes
+      }
+    }
+
+    // Connection lines between nearby particles
+    class Connection {
+      constructor(particle1, particle2) {
+        this.p1 = particle1;
+        this.p2 = particle2;
+        this.opacity = 0;
+        this.maxOpacity = Math.random() * 0.3 + 0.1;
+      }
+
+      update() {
+        const dx = this.p2.x - this.p1.x;
+        const dy = this.p2.y - this.p1.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        
+        if (distance < 120 && distance > 20) {
+          this.opacity = this.maxOpacity * (1 - distance / 120);
+        } else {
+          this.opacity = 0;
+        }
+      }
+
+      draw() {
+        if (this.opacity <= 0) return;
+
         ctx.save();
+        const isDark = body.classList.contains('dark-mode');
+        ctx.strokeStyle = `rgba(${isDark ? '10,132,255' : '0,122,255'}, ${this.opacity})`;
+        ctx.lineWidth = 1;
+        ctx.shadowColor = isDark ? '#0A84FF' : '#007AFF';
+        ctx.shadowBlur = 4;
+
         ctx.beginPath();
-        let nodeX = line.horizontal ? line.x + line.len * (line.turn ? 0.6 : 1) : line.x;
-        let nodeY = line.horizontal ? line.y : line.y + line.len * (line.turn ? 0.6 : 1);
-        ctx.arc(nodeX, nodeY, 6 + 2 * Math.abs(Math.sin(t)), 0, 2 * Math.PI);
-        ctx.fillStyle = `rgba(56,142,60,${0.18 + 0.12 * Math.abs(Math.sin(t))})`;
-        ctx.shadowColor = '#43e97b';
-        ctx.shadowBlur = 16 + 8 * Math.abs(Math.sin(t));
-        ctx.fill();
+        ctx.moveTo(this.p1.x, this.p1.y);
+        ctx.lineTo(this.p2.x, this.p2.y);
+        ctx.stroke();
         ctx.restore();
       }
-      t += 0.02;
-      requestAnimationFrame(drawCircuit);
     }
-    drawCircuit();
+
+    // Initialize particles and connections
+    const particles = [];
+    const connections = [];
+    const particleCount = 45;
+    const connectionCount = 25;
+
+    for (let i = 0; i < particleCount; i++) {
+      particles.push(new DataParticle());
+    }
+
+    for (let i = 0; i < connectionCount; i++) {
+      const p1 = particles[Math.floor(Math.random() * particles.length)];
+      const p2 = particles[Math.floor(Math.random() * particles.length)];
+      if (p1 !== p2) {
+        connections.push(new Connection(p1, p2));
+      }
+    }
+
+    // Animation loop
+    function animate() {
+      ctx.clearRect(0, 0, width, height);
+
+      // Update and draw connections first (background)
+      connections.forEach(conn => {
+        conn.update();
+        conn.draw();
+      });
+
+      // Update and draw particles
+      particles.forEach(particle => {
+        particle.update();
+        particle.draw();
+      });
+
+      requestAnimationFrame(animate);
+    }
+
+    animate();
   }
 
   // Event info slider auto-advance
@@ -100,16 +198,67 @@ document.addEventListener('DOMContentLoaded', function() {
   if (slider) {
     const slides = Array.from(slider.querySelectorAll('.event-slide'));
     let current = 0;
+    let currentScreen = 'main';
+    let autoAdvanceInterval;
+
     function showSlide(idx) {
       slides.forEach((slide, i) => {
         slide.classList.toggle('active', i === idx);
       });
     }
-    showSlide(current);
-    setInterval(() => {
-      current = (current + 1) % slides.length;
-      showSlide(current);
-    }, 5000);
+
+    function showScreen(screenName) {
+      // Hide all slides
+      slides.forEach(slide => {
+        slide.classList.remove('active');
+      });
+
+      // Show only slides for the selected screen
+      const screenSlides = slides.filter(slide => slide.dataset.screen === screenName);
+      if (screenSlides.length > 0) {
+        screenSlides[0].classList.add('active');
+        current = slides.indexOf(screenSlides[0]);
+      }
+
+      // Update navigation active state
+      document.querySelectorAll('.nav-item').forEach(item => {
+        item.classList.toggle('active', item.dataset.screen === screenName);
+      });
+
+      currentScreen = screenName;
+    }
+
+    // Initialize with main screen
+    showScreen('main');
+
+    // Auto-advance only for the current screen
+    function startAutoAdvance() {
+      if (autoAdvanceInterval) {
+        clearInterval(autoAdvanceInterval);
+      }
+      
+      autoAdvanceInterval = setInterval(() => {
+        const currentScreenSlides = slides.filter(slide => slide.dataset.screen === currentScreen);
+        const currentScreenIndex = currentScreenSlides.findIndex(slide => slide.classList.contains('active'));
+        const nextIndex = (currentScreenIndex + 1) % currentScreenSlides.length;
+        
+        // Hide all slides for current screen
+        currentScreenSlides.forEach(slide => slide.classList.remove('active'));
+        // Show next slide for current screen
+        currentScreenSlides[nextIndex].classList.add('active');
+      }, 5000);
+    }
+
+    startAutoAdvance();
+
+    // Navigation click handlers
+    document.querySelectorAll('.nav-item').forEach(item => {
+      item.addEventListener('click', function() {
+        const screenName = this.dataset.screen;
+        showScreen(screenName);
+        startAutoAdvance(); // Restart auto-advance for new screen
+      });
+    });
   }
 
   // Current date and time updater
