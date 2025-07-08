@@ -263,7 +263,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // --- Supabase Integration ---
   // Replace with your actual Supabase project URL and anon key
-  const SUPABASE_URL = 'https://supabase.com/dashboard/project/amxvmnzhwehxmnwzzaoy';
+  const SUPABASE_URL = 'https://amxvmnzhwehxmnwzzaoy.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFteHZtbnpod2VoeG1ud3p6YW95Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE5NTc5NDksImV4cCI6MjA2NzUzMzk0OX0.Vedmvf0QnCEh5TdgarY48BW2vrBgmYayQ2c-fcKFHlo';
   const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
