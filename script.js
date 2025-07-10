@@ -77,11 +77,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Set color based on theme
         const isDark = body.classList.contains('dark-mode');
-        const primaryColor = isDark ? '#0A84FF' : '#007AFF';
+        const primaryColor = isDark ? '#30D158' : '#34C759';
         const accentColor = isDark ? '#5E5CE6' : '#5856D6';
 
-        ctx.fillStyle = `rgba(${isDark ? '10,132,255' : '0,122,255'}, ${currentOpacity})`;
-        ctx.strokeStyle = `rgba(${isDark ? '94,92,230' : '88,86,214'}, ${currentOpacity * 0.6})`;
+        ctx.fillStyle = `rgba(${isDark ? '48,209,88' : '52,199,89'}, ${currentOpacity})`;
+        ctx.strokeStyle = `rgba(${isDark ? '40,167,69' : '40,167,69'}, ${currentOpacity * 0.6})`;
         ctx.lineWidth = 1;
         ctx.shadowColor = primaryColor;
         ctx.shadowBlur = 8 * pulseFactor;
@@ -140,9 +140,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
         ctx.save();
         const isDark = body.classList.contains('dark-mode');
-        ctx.strokeStyle = `rgba(${isDark ? '10,132,255' : '0,122,255'}, ${this.opacity})`;
+        ctx.strokeStyle = `rgba(${isDark ? '48,209,88' : '52,199,89'}, ${this.opacity})`;
         ctx.lineWidth = 1;
-        ctx.shadowColor = isDark ? '#0A84FF' : '#007AFF';
+        ctx.shadowColor = isDark ? '#30D158' : '#34C759';
         ctx.shadowBlur = 4;
 
         ctx.beginPath();
@@ -225,6 +225,16 @@ document.addEventListener('DOMContentLoaded', function() {
         item.classList.toggle('active', item.dataset.screen === screenName);
       });
 
+      // Handle event-info container for send-message screen
+      const eventInfo = document.querySelector('.event-info');
+      if (eventInfo) {
+        if (screenName === 'send-message') {
+          eventInfo.classList.add('send-message-active');
+        } else {
+          eventInfo.classList.remove('send-message-active');
+        }
+      }
+
       currentScreen = screenName;
     }
 
@@ -267,15 +277,37 @@ document.addEventListener('DOMContentLoaded', function() {
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFteHZtbnpod2VoeG1ud3p6YW95Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE5NTc5NDksImV4cCI6MjA2NzUzMzk0OX0.Vedmvf0QnCEh5TdgarY48BW2vrBgmYayQ2c-fcKFHlo';
   const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  // Message system functionality
+  // Award message system functionality
   const messageForm = document.getElementById('messageForm');
   const messageInput = document.getElementById('messageInput');
   const userSelect = document.getElementById('userSelect');
   const charCount = document.getElementById('charCount');
+  const photoInput = document.getElementById('photoInput');
+  const photoUploadArea = document.getElementById('photoUploadArea');
+  const photoPreviewContainer = document.getElementById('photoPreviewContainer');
+  const photoPreview = document.getElementById('photoPreview');
   const messagePopup = document.getElementById('messagePopup');
   const messageAuthor = document.getElementById('messageAuthor');
   const messageText = document.getElementById('messageText');
   const messageTime = document.getElementById('messageTime');
+
+  // Photo upload functionality
+  if (photoInput && photoUploadArea) {
+    photoUploadArea.addEventListener('click', () => photoInput.click());
+    
+    photoInput.addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          photoPreview.src = e.target.result;
+          photoPreviewContainer.style.display = 'block';
+          photoUploadArea.style.display = 'none';
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  }
 
   // Character counter
   if (messageInput) {
@@ -297,9 +329,10 @@ document.addEventListener('DOMContentLoaded', function() {
   // --- Supabase Send Message ---
   async function sendMessageToSupabase(author, content) {
     // Show loading state (disable button)
-    const submitBtn = messageForm.querySelector('.form-submit');
+    const submitBtn = messageForm.querySelector('.award-submit');
+    const originalContent = submitBtn.innerHTML;
     submitBtn.disabled = true;
-    submitBtn.textContent = 'Sending...';
+    submitBtn.innerHTML = '<svg class="submit-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="10,8 16,12 10,16"/></svg><span>Sending...</span>';
 
     // Insert message into Supabase
     const { error } = await supabase.from('messages').insert([
@@ -308,7 +341,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Restore button
     submitBtn.disabled = false;
-    submitBtn.textContent = 'Send Message';
+    submitBtn.innerHTML = originalContent;
 
     if (error) {
       alert('Failed to send message. Please try again.');
@@ -336,8 +369,16 @@ document.addEventListener('DOMContentLoaded', function() {
         messageForm.reset();
         charCount.textContent = '0';
         charCount.style.color = 'var(--muted)';
+        
+        // Reset photo preview
+        if (photoPreviewContainer && photoUploadArea) {
+          photoPreviewContainer.style.display = 'none';
+          photoUploadArea.style.display = 'block';
+          photoPreview.src = '';
+        }
+        
         // Show success popup
-        showMessagePopup(userName, 'Message sent!');
+        showMessagePopup(userName, 'Award message sent!');
       }
     });
   }
@@ -474,10 +515,15 @@ document.addEventListener('DOMContentLoaded', function() {
     const date = now.getDate().toString().padStart(2, '0');
     const month = months[now.getMonth()];
     const year = now.getFullYear();
-    const hours = now.getHours().toString().padStart(2, '0');
+    
+    // Format time with AM/PM
+    let hours = now.getHours();
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours ? hours : 12; // the hour '0' should be '12'
     const minutes = now.getMinutes().toString().padStart(2, '0');
-    const seconds = now.getSeconds().toString().padStart(2, '0');
-    timeEl.textContent = `${hours}:${minutes}:${seconds}`;
+    
+    timeEl.textContent = `${hours}:${minutes} ${ampm}`;
     dateEl.textContent = `${day}, ${date} ${month} ${year}`;
   }
   updateDatetime();

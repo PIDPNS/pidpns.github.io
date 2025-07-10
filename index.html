@@ -11,13 +11,30 @@
   <div class="backdrop">
     <header class="header">
       <div class="logo-container">
-        <img src="assets/logo.png" alt="Event Logo" class="logo-img" />
-        <span class="logo-text">Perpustakaan Negeri Sabah</span>
+        <img src="assets/1.png" alt="First Logo" class="logo-img" />
+        <span class="logo-separator">|</span>
+        <img src="assets/2.png" alt="Second Logo" class="logo-img" />
+        <span class="logo-text">PERPUSTAKAAN NEGERI SABAH</span>
       </div>
       <div class="header-right">
         <div class="current-datetime" id="currentDatetime">
-          <span id="currentTime"></span>
-          <span id="currentDate"></span>
+          <div class="time-section">
+            <svg class="time-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12,6 12,12 16,14"/>
+            </svg>
+            <span id="currentTime"></span>
+          </div>
+          <span class="datetime-separator">|</span>
+          <div class="date-section">
+            <svg class="date-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+              <line x1="16" y1="2" x2="16" y2="6"/>
+              <line x1="8" y1="2" x2="8" y2="6"/>
+              <line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+            <span id="currentDate"></span>
+          </div>
         </div>
         <button id="themeToggle" class="theme-toggle" aria-label="Toggle light/dark mode">
           <span class="theme-icon">
@@ -88,15 +105,15 @@
           <!-- Messages Screen -->
           <div class="event-slide" data-screen="messages">
             <div class="messages-container">
-              <h1 class="event-title" id="liveMessagesTitle">Live Messages</h1>
+              <h1 class="event-title" id="liveMessagesTitle">Digital Photobooth</h1>
               <div class="messages-status" id="messagesStatus">
                 <div class="status-indicator improved-instructions">
                   <span class="status-text">
                     <span class="main-instruction">
-                      To send a message, go to the Technical section and select your name for authentication.
+                      Step on stage and see yourself as an award recipient. Your name, photo, and message will appear on the digital backdrop.
                     </span>
                     <span class="instruction-note">
-                      Note: Use only your own name. Do not impersonate others or send unrelated content.
+                      Tip: Submit your photo and message in the Send a Message section.
                     </span>
                   </span>
                 </div>
@@ -107,55 +124,78 @@
 
           <!-- Send Message Screen -->
           <div class="event-slide" data-screen="send-message">
-            <div class="message-form-container">
-              <div class="form-left-section">
-                <h1 class="event-title">Send a Message</h1>
-                <div class="form-info">
-                  <p class="form-description">Share your thoughts and connect with other attendees at the Digital Transformation Summit 2025.</p>
-                  <div class="form-stats">
-                    <div class="stat-item">
-                      <span class="stat-number">200</span>
-                      <span class="stat-label">Character Limit</span>
+            <div class="award-message-container">
+              <div class="award-header">
+                <div class="award-icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="8" r="6"/>
+                    <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/>
+                  </svg>
+                </div>
+                <h1 class="award-title">Digital Award Recognition</h1>
+                <p class="award-subtitle">Share your achievement message and photo</p>
+              </div>
+              
+              <form class="award-form" id="messageForm">
+                <div class="form-section">
+                  <div class="photo-upload-area" id="photoUploadArea">
+                    <div class="upload-placeholder">
+                      <svg class="upload-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="7,10 12,15 17,10"/>
+                        <line x1="12" y1="15" x2="12" y2="3"/>
+                      </svg>
+                      <span class="upload-text">Upload Your Photo</span>
                     </div>
-                    <div class="stat-item">
-                      <span class="stat-number">8</span>
-                      <span class="stat-label">Attendees Online</span>
+                    <input type="file" id="photoInput" class="photo-input" accept="image/*" required />
+                    <div id="photoPreviewContainer" class="photo-preview-container">
+                      <img id="photoPreview" class="photo-preview" src="" alt="Photo Preview" />
                     </div>
                   </div>
                 </div>
-              </div>
-              <div class="form-right-section">
-                <form class="message-form" id="messageForm">
-                  <div class="form-group">
-                    <label for="userSelect" class="form-label">Your Name</label>
-                    <select id="userSelect" class="form-select" required>
-                      <option value="">Choose your name...</option>
-                      <option value="Dr. Aisyah Rahman">Dr. Aisyah Rahman</option>
-                      <option value="Ahmad Zulkarnain">Ahmad Zulkarnain</option>
-                      <option value="Sarah Lim">Sarah Lim</option>
-                      <option value="Mohammed Ali">Mohammed Ali</option>
-                      <option value="Lisa Chen">Lisa Chen</option>
-                      <option value="Rajesh Kumar">Rajesh Kumar</option>
-                      <option value="Emma Wilson">Emma Wilson</option>
-                      <option value="David Tan">David Tan</option>
-                    </select>
-                  </div>
-                  <div class="form-group">
-                    <label for="messageInput" class="form-label">Your Message</label>
-                    <textarea id="messageInput" class="form-textarea" placeholder="Type your message here..." maxlength="200" required></textarea>
-                    <div class="char-count">
-                      <span id="charCount">0</span>/200
+
+                <div class="form-section">
+                  <div class="input-group">
+                    <label for="userSelect" class="input-label">Recipient Name</label>
+                    <div class="select-wrapper">
+                      <select id="userSelect" class="award-select" required>
+                        <option value="">Select your name...</option>
+                        <option value="Dr. Aisyah Rahman">Dr. Aisyah Rahman</option>
+                        <option value="Ahmad Zulkarnain">Ahmad Zulkarnain</option>
+                        <option value="Sarah Lim">Sarah Lim</option>
+                        <option value="Mohammed Ali">Mohammed Ali</option>
+                        <option value="Lisa Chen">Lisa Chen</option>
+                        <option value="Rajesh Kumar">Rajesh Kumar</option>
+                        <option value="Emma Wilson">Emma Wilson</option>
+                        <option value="David Tan">David Tan</option>
+                      </select>
+                      <svg class="select-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6,9 12,15 18,9"/>
+                      </svg>
                     </div>
                   </div>
-                  <button type="submit" class="form-submit">
-                    <svg class="submit-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <line x1="22" y1="2" x2="11" y2="13"/>
-                      <polygon points="22,2 15,22 11,13 2,9 22,2"/>
-                    </svg>
-                    Send Message
-                  </button>
-                </form>
-              </div>
+                </div>
+
+                <div class="form-section">
+                  <div class="input-group">
+                    <label for="messageInput" class="input-label">Award Message</label>
+                    <div class="textarea-wrapper">
+                      <textarea id="messageInput" class="award-textarea" placeholder="Share your achievement message..." maxlength="200" required rows="3"></textarea>
+                      <div class="char-counter">
+                        <span id="charCount">0</span>/200
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <button type="submit" class="award-submit">
+                  <svg class="submit-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="22" y1="2" x2="11" y2="13"/>
+                    <polygon points="22,2 15,22 11,13 2,9 22,2"/>
+                  </svg>
+                  <span>Send Award Message</span>
+                </button>
+              </form>
             </div>
           </div>
 
@@ -187,6 +227,8 @@
           </div>
         </div>
       </section>
+    </main>
+    <footer class="footer">
       <nav class="nav-bar">
         <div class="nav-container">
           <button class="nav-item active" data-screen="main" title="Main Event">
@@ -195,9 +237,10 @@
               <polyline points="9,22 9,12 15,12 15,22"/>
             </svg>
           </button>
-          <button class="nav-item" data-screen="messages" title="Live Messages">
+          <button class="nav-item" data-screen="messages" title="Digital Photobooth">
             <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+              <circle cx="12" cy="13" r="4"/>
             </svg>
           </button>
           <button class="nav-item" data-screen="send-message" title="Send Message">
@@ -208,29 +251,6 @@
           </button>
         </div>
       </nav>
-    </main>
-    <footer class="footer">
-      <div class="mobile-footer-nav nav-bar">
-        <div class="nav-container">
-          <button class="nav-item active" data-screen="main" title="Main Event">
-            <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-              <polyline points="9,22 9,12 15,12 15,22"/>
-            </svg>
-          </button>
-          <button class="nav-item" data-screen="messages" title="Live Messages">
-            <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-            </svg>
-          </button>
-          <button class="nav-item" data-screen="send-message" title="Send Message">
-            <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="22" y1="2" x2="11" y2="13"/>
-              <polygon points="22,2 15,22 11,13 2,9 22,2"/>
-            </svg>
-          </button>
-        </div>
-      </div>
       <div class="footer-content">
         <span>Pasukan Inovasi Digital</span>
       </div>
