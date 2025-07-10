@@ -208,16 +208,27 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function showScreen(screenName) {
-      // Hide all slides
-      slides.forEach(slide => {
-        slide.classList.remove('active');
+      // Hide all screens
+      document.querySelectorAll('.screen-container').forEach(screen => {
+        screen.classList.remove('active');
       });
+      document.querySelector('.event-info').style.display = 'none';
 
-      // Show only slides for the selected screen
-      const screenSlides = slides.filter(slide => slide.dataset.screen === screenName);
-      if (screenSlides.length > 0) {
-        screenSlides[0].classList.add('active');
-        current = slides.indexOf(screenSlides[0]);
+      // Show the selected screen
+      if (screenName === 'main') {
+        document.querySelector('.event-info').style.display = 'flex';
+        // Show first slide of main screen
+        const mainSlides = slides.filter(slide => slide.dataset.screen === 'main');
+        if (mainSlides.length > 0) {
+          mainSlides.forEach(slide => slide.classList.remove('active'));
+          mainSlides[0].classList.add('active');
+          current = slides.indexOf(mainSlides[0]);
+        }
+      } else {
+        const targetScreen = document.querySelector(`.screen-container[data-screen="${screenName}"]`);
+        if (targetScreen) {
+          targetScreen.classList.add('active');
+        }
       }
 
       // Update navigation active state
@@ -225,48 +236,44 @@ document.addEventListener('DOMContentLoaded', function() {
         item.classList.toggle('active', item.dataset.screen === screenName);
       });
 
-      // Handle event-info container for send-message screen
-      const eventInfo = document.querySelector('.event-info');
-      if (eventInfo) {
-        if (screenName === 'send-message') {
-          eventInfo.classList.add('send-message-active');
-        } else {
-          eventInfo.classList.remove('send-message-active');
+      currentScreen = screenName;
+
+      // Start auto-advance only for main screen
+      if (screenName === 'main') {
+        startAutoAdvance();
+      } else {
+        if (autoAdvanceInterval) {
+          clearInterval(autoAdvanceInterval);
         }
       }
-
-      currentScreen = screenName;
     }
 
     // Initialize with main screen
     showScreen('main');
 
-    // Auto-advance only for the current screen
+    // Auto-advance only for the main screen
     function startAutoAdvance() {
       if (autoAdvanceInterval) {
         clearInterval(autoAdvanceInterval);
       }
       
       autoAdvanceInterval = setInterval(() => {
-        const currentScreenSlides = slides.filter(slide => slide.dataset.screen === currentScreen);
-        const currentScreenIndex = currentScreenSlides.findIndex(slide => slide.classList.contains('active'));
-        const nextIndex = (currentScreenIndex + 1) % currentScreenSlides.length;
-        
-        // Hide all slides for current screen
-        currentScreenSlides.forEach(slide => slide.classList.remove('active'));
-        // Show next slide for current screen
-        currentScreenSlides[nextIndex].classList.add('active');
+        if (currentScreen === 'main') {
+          const mainSlides = slides.filter(slide => slide.dataset.screen === 'main');
+          const currentIndex = mainSlides.findIndex(slide => slide.classList.contains('active'));
+          const nextIndex = (currentIndex + 1) % mainSlides.length;
+          
+          mainSlides.forEach(slide => slide.classList.remove('active'));
+          mainSlides[nextIndex].classList.add('active');
+        }
       }, 5000);
     }
-
-    startAutoAdvance();
 
     // Navigation click handlers
     document.querySelectorAll('.nav-item').forEach(item => {
       item.addEventListener('click', function() {
         const screenName = this.dataset.screen;
         showScreen(screenName);
-        startAutoAdvance(); // Restart auto-advance for new screen
       });
     });
   }

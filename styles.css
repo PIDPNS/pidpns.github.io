@@ -12,6 +12,9 @@
   --orbitron: 'Orbitron', sans-serif;
   --inter: 'Inter', Arial, sans-serif;
   --transition: 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --aspect-ratio: calc(16 / 9);
+  --min-height: 100vh;
+  --max-height: calc(100vw / var(--aspect-ratio));
 }
 
 body.dark-mode {
@@ -28,15 +31,20 @@ body.dark-mode {
 
 html, body {
   height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
 }
 
 body {
-  min-height: 100vh;
+  min-height: var(--min-height);
+  max-height: var(--max-height);
   background: linear-gradient(135deg, #F5F5F7 0%, #E5E5E7 50%, #D1D1D6 100%);
   color: var(--text);
   font-family: var(--inter);
   transition: background var(--transition), color var(--transition);
-  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 body.dark-mode {
@@ -44,21 +52,48 @@ body.dark-mode {
 }
 
 .backdrop {
-  min-height: 100vh;
+  min-height: var(--min-height);
+  max-height: var(--max-height);
   display: flex;
   flex-direction: column;
   position: relative;
-  height: 100vh;
   overflow: hidden;
+  aspect-ratio: 16/9;
+  margin: auto;
+  width: 100%;
+  max-width: 1920px;
 }
-/* Official Digital Backdrop page blank center and min height */
+/* Official Digital Backdrop page */
 .official-backdrop-page {
   flex: 1 0 auto;
   min-height: 60vh;
+  max-height: calc(var(--max-height) - 200px);
   display: flex;
   align-items: center;
   justify-content: center;
+  background: none;
+  padding: 2rem 1rem;
+  box-sizing: border-box;
 }
+
+.official-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
+  gap: 1.5rem;
+  background: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
 .header {
   display: flex;
   justify-content: space-between;
@@ -159,6 +194,19 @@ body.dark-mode .icon-moon {
   display: block;
   color: #f4f8fb;
 }
+/* Canvas sizing */
+#circuitLines {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  aspect-ratio: 16/9;
+}
+
+/* Main content sizing with fixed height */
 .main-content {
   flex: 1;
   display: flex;
@@ -168,37 +216,64 @@ body.dark-mode .icon-moon {
   position: relative;
   z-index: 2;
   overflow: visible;
+  padding: 1rem;
+  box-sizing: border-box;
+  height: calc(100% - 180px); /* Fixed height accounting for header and footer */
 }
-#circuitLines {
+
+/* Main content screens */
+.screen-container {
   position: absolute;
   top: 0;
   left: 0;
-  min-width: 100vw;
-  min-height: 100vh;
-  width: 100%;
-  height: 100%;
-  z-index: 0;
-  pointer-events: none;
+  right: 0;
+  height: calc(100% - 120px);
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem 1rem;
+  box-sizing: border-box;
+  background: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  z-index: 1;
 }
-.main-content > *:not(#circuitLines) {
-  position: relative;
-  z-index: 2;
+
+.screen-container[data-screen="messages"],
+.screen-container[data-screen="send-message"] {
+  display: none;
 }
+
+.screen-container[data-screen="messages"].active,
+.screen-container[data-screen="send-message"].active {
+  display: flex;
+}
+
+/* Event info only for main screen */
 .event-info {
+  display: none;
+  width: 100%;
+  max-width: 1200px;
   height: 520px;
-  position: relative;
+  margin: 0 auto;
+  padding: 2rem;
+  box-sizing: border-box;
   background: linear-gradient(120deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.7) 100%);
   border: 1px solid rgba(0,0,0,0.08);
   border-radius: 1.5rem;
-  padding: 2.5rem 4rem;
   box-shadow: 0 20px 40px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.05);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   text-align: center;
-  margin-bottom: 2rem;
   z-index: 3;
   overflow: hidden;
   color: var(--text);
+}
+
+.event-info[data-screen="main"] {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -290,8 +365,10 @@ body.dark-mode .glass-card {
   border: 1px solid rgba(255,255,255,0.1);
   box-shadow: 0 10px 25px rgba(0,0,0,0.3), 0 1px 3px rgba(0,0,0,0.1);
 }
+/* Footer with fixed height */
 .footer {
-  width: 100vw;
+  width: 100%;
+  height: 120px; /* Fixed height */
   padding: 0.5rem 0 1.5rem 0;
   display: flex;
   flex-direction: column;
@@ -302,6 +379,7 @@ body.dark-mode .glass-card {
   flex-shrink: 0;
   position: relative;
   margin-top: auto;
+  background: transparent;
 }
 .footer-content {
   font-size: 1rem;
@@ -648,13 +726,27 @@ body.dark-mode .nav-item.active {
 }
 
 /* Messages Screen Styles */
+/* Messages container with fixed height */
 .messages-container {
   width: 100%;
-  height: 100%;
+  max-width: 1200px;
+  height: 520px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  margin: 0 auto;
+  padding: 2rem;
+  box-sizing: border-box;
+  background: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  text-align: center;
+  z-index: 3;
+  overflow: hidden;
+  color: var(--text);
 }
 
 .messages-status {
@@ -1409,18 +1501,32 @@ body.dark-mode .form-textarea {
 
 /* Fresh Award Message Design */
 .award-message-container {
+  width: 100%;
+  max-width: 1200px;
+  height: 100%;
+  min-height: 600px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 100%;
-  height: 100%;
-  padding: 20px;
+  margin: 0 auto;
+  padding: 2rem;
+  box-sizing: border-box;
+  background: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  text-align: center;
+  z-index: 3;
+  overflow: visible;
+  color: var(--text);
 }
 
 .award-header {
   text-align: center;
-  margin-bottom: 24px;
+  margin-bottom: 1rem;
+  padding: 1rem;
 }
 
 .award-icon {
@@ -1448,13 +1554,14 @@ body.dark-mode .form-textarea {
 .award-form {
   background: transparent;
   border-radius: 20px;
-  padding: 28px;
+  padding: 2rem;
   max-width: 380px;
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 1.5rem;
   box-sizing: border-box;
+  margin-bottom: 2rem;
 }
 
 .form-section {
@@ -1624,6 +1731,9 @@ body.dark-mode .form-textarea {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
+  margin-top: 1rem;
+  position: relative;
+  z-index: 10;
 }
 
 .award-submit:hover {
@@ -1753,31 +1863,54 @@ body.dark-mode .form-submit {
   top: 0;
   left: 0;
   right: 0;
-  bottom: 0;
+  height: calc(100% - 120px); /* Fixed height accounting for footer */
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
-  padding: 4rem 1rem 8rem 1rem; /* Extra padding at bottom for nav/footer */
-  background: transparent;
+  padding: 2rem 1rem;
+  box-sizing: border-box;
+  background: none;
   z-index: 1;
 }
 
 .official-content {
-  max-width: 1000px;
-  width: 100%;
-  margin: auto;
-  padding: 3rem;
-  background: var(--surface);
-  border: 1px solid var(--glass-border);
-  border-radius: 24px;
-  backdrop-filter: blur(var(--surface-blur));
-  -webkit-backdrop-filter: blur(var(--surface-blur));
-  box-shadow: var(--shadow);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2rem;
+  justify-content: center;
+  padding: 2rem;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
+  gap: 1.5rem;
+  background: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.official-logo {
+  margin-bottom: 1rem;
+}
+
+.official-slogan {
+  font-family: var(--orbitron);
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin: -13.2rem 0;
+  letter-spacing: 0.1em;
+}
+
+.official-details {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  background: none !important;
 }
 
 .official-logo {
@@ -1799,7 +1932,7 @@ body.dark-mode .form-submit {
 
 .official-title {
   font-family: var(--orbitron);
-  font-size: 2.5rem;
+  font-size: 2.4rem;
   font-weight: 700;
   color: var(--primary);
   margin: 0;
@@ -1808,7 +1941,7 @@ body.dark-mode .form-submit {
 
 .official-event {
   font-family: var(--orbitron);
-  font-size: 1.8rem;
+  font-size: 1.6rem;
   font-weight: 600;
   color: var(--text);
   margin: 0;
@@ -1823,7 +1956,7 @@ body.dark-mode .form-submit {
 }
 
 .official-officiated {
-  margin: 1.5rem 0;
+  margin: 1.2rem 0;
   font-family: var(--inter);
 }
 

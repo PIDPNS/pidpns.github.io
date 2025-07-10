@@ -46,7 +46,7 @@
       </div>
     </header>
     <main class="main-content">
-      <section class="event-info">
+      <section class="event-info" data-screen="main">
         <div class="event-slider">
           <!-- Main Event Screen -->
           <div class="event-slide active" data-screen="main">
@@ -74,159 +74,105 @@
             </div>
             <div class="event-hashtag">#FutureReady</div>
           </div>
-
-          <!-- Schedule Screen -->
-          <div class="event-slide" data-screen="schedule">
-            <h1 class="event-title">Event Schedule</h1>
-            <div class="event-details">
-              <span class="event-date">Full Day Program</span>
-              <span class="separator">|</span>
-              <span class="event-location">8:00 AM - 6:00 PM</span>
-            </div>
-            <div class="event-hashtag">#DigiSummit2025</div>
-          </div>
-          <div class="event-slide" data-screen="schedule">
-            <h1 class="event-title">Morning Sessions</h1>
-            <div class="event-details">
-              <span class="event-speaker">Keynotes & Panel Discussions</span>
-              <span class="separator">|</span>
-              <span class="event-role">8:00 AM - 12:00 PM</span>
-            </div>
-            <div class="event-hashtag">#MorningSessions</div>
-          </div>
-          <div class="event-slide" data-screen="schedule">
-            <h1 class="event-title">Afternoon Workshops</h1>
-            <div class="event-details">
-              <span class="event-highlight">Interactive Sessions & Networking</span>
-            </div>
-            <div class="event-hashtag">#WorkshopTime</div>
-          </div>
-
-          <!-- Messages Screen -->
-          <div class="event-slide" data-screen="messages">
-            <div class="messages-container">
-              <h1 class="event-title" id="liveMessagesTitle">Digital Photobooth</h1>
-              <div class="messages-status" id="messagesStatus">
-                <div class="status-indicator improved-instructions">
-                  <span class="status-text">
-                    <span class="main-instruction">
-                      Step on stage and see yourself as an award recipient. Your name, photo, and message will appear on the digital backdrop.
-                    </span>
-                    <span class="instruction-note">
-                      Tip: Submit your photo and message in the Send a Message section.
-                    </span>
-                  </span>
-                </div>
-              </div>
-              <div id="messagesPopups"></div>
-            </div>
-          </div>
-
-          <!-- Send Message Screen -->
-          <div class="event-slide" data-screen="send-message">
-            <div class="award-message-container">
-              <div class="award-header">
-                <div class="award-icon">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="8" r="6"/>
-                    <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/>
-                  </svg>
-                </div>
-                <h1 class="award-title">Digital Award Recognition</h1>
-                <p class="award-subtitle">Share your achievement message and photo</p>
-              </div>
-              
-              <form class="award-form" id="messageForm">
-                <div class="form-section">
-                  <div class="photo-upload-area" id="photoUploadArea">
-                    <div class="upload-placeholder">
-                      <svg class="upload-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                        <polyline points="7,10 12,15 17,10"/>
-                        <line x1="12" y1="15" x2="12" y2="3"/>
-                      </svg>
-                      <span class="upload-text">Upload Your Photo</span>
-                    </div>
-                    <input type="file" id="photoInput" class="photo-input" accept="image/*" required />
-                    <div id="photoPreviewContainer" class="photo-preview-container">
-                      <img id="photoPreview" class="photo-preview" src="" alt="Photo Preview" />
-                    </div>
-                  </div>
-                </div>
-
-                <div class="form-section">
-                  <div class="input-group">
-                    <label for="userSelect" class="input-label">Recipient Name</label>
-                    <div class="select-wrapper">
-                      <select id="userSelect" class="award-select" required>
-                        <option value="">Select your name...</option>
-                        <option value="Dr. Aisyah Rahman">Dr. Aisyah Rahman</option>
-                        <option value="Ahmad Zulkarnain">Ahmad Zulkarnain</option>
-                        <option value="Sarah Lim">Sarah Lim</option>
-                        <option value="Mohammed Ali">Mohammed Ali</option>
-                        <option value="Lisa Chen">Lisa Chen</option>
-                        <option value="Rajesh Kumar">Rajesh Kumar</option>
-                        <option value="Emma Wilson">Emma Wilson</option>
-                        <option value="David Tan">David Tan</option>
-                      </select>
-                      <svg class="select-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="6,9 12,15 18,9"/>
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="form-section">
-                  <div class="input-group">
-                    <label for="messageInput" class="input-label">Award Message</label>
-                    <div class="textarea-wrapper">
-                      <textarea id="messageInput" class="award-textarea" placeholder="Share your achievement message..." maxlength="200" required rows="3"></textarea>
-                      <div class="char-counter">
-                        <span id="charCount">0</span>/200
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <button type="submit" class="award-submit">
-                  <svg class="submit-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="22" y1="2" x2="11" y2="13"/>
-                    <polygon points="22,2 15,22 11,13 2,9 22,2"/>
-                  </svg>
-                  <span>Send Award Message</span>
-                </button>
-              </form>
-            </div>
-          </div>
-
-          <!-- Speakers Screen -->
-          <div class="event-slide" data-screen="speakers">
-            <h1 class="event-title">Featured Speakers</h1>
-            <div class="event-details">
-              <span class="event-speaker">Industry Leaders & Experts</span>
-              <span class="separator">|</span>
-              <span class="event-role">Digital Innovation</span>
-            </div>
-            <div class="event-hashtag">#ExpertSpeakers</div>
-          </div>
-          <div class="event-slide" data-screen="speakers">
-            <h1 class="event-title">Dr. Aisyah Rahman</h1>
-            <div class="event-details">
-              <span class="event-speaker">Chief Digital Officer</span>
-              <span class="separator">|</span>
-              <span class="event-role">Keynote Speaker</span>
-            </div>
-            <div class="event-hashtag">#KeynoteSpeaker</div>
-          </div>
-          <div class="event-slide" data-screen="speakers">
-            <h1 class="event-title">More Speakers</h1>
-            <div class="event-details">
-              <span class="event-highlight">Panel Discussions & Workshops</span>
-            </div>
-            <div class="event-hashtag">#PanelExperts</div>
-          </div>
         </div>
       </section>
+
+      <!-- Digital Photobooth Screen -->
+      <div class="screen-container" data-screen="messages">
+        <div class="messages-container">
+          <h1 class="event-title" id="liveMessagesTitle">Digital Photobooth</h1>
+          <div class="messages-status" id="messagesStatus">
+            <div class="status-indicator improved-instructions">
+              <span class="status-text">
+                <span class="main-instruction">
+                  Step on stage and see yourself as an award recipient. Your name, photo, and message will appear on the digital backdrop.
+                </span>
+                <span class="instruction-note">
+                  Tip: Submit your photo and message in the Send a Message section.
+                </span>
+              </span>
+            </div>
+          </div>
+          <div id="messagesPopups"></div>
+        </div>
+      </div>
+
+      <!-- Send Message Screen -->
+      <div class="screen-container" data-screen="send-message">
+        <div class="award-message-container">
+          <div class="award-header">
+            <div class="award-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="8" r="6"/>
+                <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/>
+              </svg>
+            </div>
+            <h1 class="award-title">Digital Award Recognition</h1>
+            <p class="award-subtitle">Share your achievement message and photo</p>
+          </div>
+          
+          <form class="award-form" id="messageForm">
+            <div class="form-section">
+              <div class="photo-upload-area" id="photoUploadArea">
+                <div class="upload-placeholder">
+                  <svg class="upload-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7,10 12,15 17,10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                  </svg>
+                  <span class="upload-text">Upload Your Photo</span>
+                </div>
+                <input type="file" id="photoInput" class="photo-input" accept="image/*" required />
+                <div id="photoPreviewContainer" class="photo-preview-container">
+                  <img id="photoPreview" class="photo-preview" src="" alt="Photo Preview" />
+                </div>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <div class="input-group">
+                <label for="userSelect" class="input-label">Recipient Name</label>
+                <div class="select-wrapper">
+                  <select id="userSelect" class="award-select" required>
+                    <option value="">Select your name...</option>
+                    <option value="Dr. Aisyah Rahman">Dr. Aisyah Rahman</option>
+                    <option value="Ahmad Zulkarnain">Ahmad Zulkarnain</option>
+                    <option value="Sarah Lim">Sarah Lim</option>
+                    <option value="Mohammed Ali">Mohammed Ali</option>
+                    <option value="Lisa Chen">Lisa Chen</option>
+                    <option value="Rajesh Kumar">Rajesh Kumar</option>
+                    <option value="Emma Wilson">Emma Wilson</option>
+                    <option value="David Tan">David Tan</option>
+                  </select>
+                  <svg class="select-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6,9 12,15 18,9"/>
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <div class="input-group">
+                <label for="messageInput" class="input-label">Award Message</label>
+                <div class="textarea-wrapper">
+                  <textarea id="messageInput" class="award-textarea" placeholder="Share your achievement message..." maxlength="200" required rows="3"></textarea>
+                  <div class="char-counter">
+                    <span id="charCount">0</span>/200
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <button type="submit" class="award-submit">
+              <svg class="submit-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="22" y1="2" x2="11" y2="13"/>
+                <polygon points="22,2 15,22 11,13 2,9 22,2"/>
+              </svg>
+              <span>Send Award Message</span>
+            </button>
+          </form>
+        </div>
+      </div>
     </main>
     <footer class="footer">
       <nav class="nav-bar">
@@ -258,7 +204,7 @@
         </div>
       </nav>
       <div class="footer-content">
-        <span>Pasukan Inovasi Digital</span>
+        <span>Digital Backdrop | Pasukan Inovasi Digital</span>
       </div>
     </footer>
     <!-- Move official-backdrop-page here, as a sibling to header, main-content, and footer -->
@@ -268,6 +214,7 @@
           <img src="assets/2.png" alt="Event Logo" class="event-logo">
         </div>
         <div class="official-details">
+          <div class="official-slogan">"SABAH MAJU JAYA"</div>
           <h1 class="official-title">MAJLIS PERASMIAN</h1>
           <h2 class="official-event">MINGGU PERPUSTAKAAN DAN STORYWALK® <span class="official-event-sub">(Walk With The Library)</span></h2>
           <div class="official-officiated">
@@ -290,7 +237,6 @@
           </div>
         </div>
       </div>
-      <div class="official-slogan">SABAH MAJU JAYA</div>
     </div>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
