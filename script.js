@@ -495,6 +495,23 @@ document.addEventListener('DOMContentLoaded', function() {
     item.addEventListener('click', function() {
       const screenName = this.dataset.screen;
       handleScreenChangeForMessages(screenName);
+      // Official Digital Backdrop page logic
+      const header = document.querySelector('.header');
+      const mainContent = document.querySelector('.main-content');
+      const eventInfo = document.querySelector('.event-info');
+      const officialPage = document.querySelector('.official-backdrop-page');
+      const circuitCanvas = document.getElementById('circuitLines');
+      if (screenName === 'official') {
+        if (header) header.style.display = 'none';
+        if (mainContent) mainContent.style.display = 'none';
+        if (officialPage) officialPage.style.display = 'block';
+        if (circuitCanvas) circuitCanvas.style.display = 'block';
+      } else {
+        if (header) header.style.display = '';
+        if (mainContent) mainContent.style.display = '';
+        if (officialPage) officialPage.style.display = 'none';
+        if (circuitCanvas) circuitCanvas.style.display = '';
+      }
     });
   });
 

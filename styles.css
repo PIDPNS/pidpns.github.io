@@ -47,8 +47,17 @@ body.dark-mode {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
   position: relative;
+  height: 100vh;
+  overflow: hidden;
+}
+/* Official Digital Backdrop page blank center and min height */
+.official-backdrop-page {
+  flex: 1 0 auto;
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .header {
   display: flex;
@@ -290,6 +299,9 @@ body.dark-mode .glass-card {
   align-items: center;
   z-index: 10;
   gap: 0.8rem;
+  flex-shrink: 0;
+  position: relative;
+  margin-top: auto;
 }
 .footer-content {
   font-size: 1rem;
@@ -1733,4 +1745,182 @@ body.dark-mode .form-textarea::placeholder {
 body.dark-mode .form-submit {
   background: linear-gradient(90deg, var(--primary) 70%, var(--accent) 100%);
   color: #fff;
+}
+
+/* Official Digital Backdrop Page Styles */
+.official-backdrop-page {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4rem 1rem 8rem 1rem; /* Extra padding at bottom for nav/footer */
+  background: transparent;
+  z-index: 1;
+}
+
+.official-content {
+  max-width: 1000px;
+  width: 100%;
+  margin: auto;
+  padding: 3rem;
+  background: var(--surface);
+  border: 1px solid var(--glass-border);
+  border-radius: 24px;
+  backdrop-filter: blur(var(--surface-blur));
+  -webkit-backdrop-filter: blur(var(--surface-blur));
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+}
+
+.official-logo {
+  margin-bottom: 1rem;
+}
+
+.event-logo {
+  width: 120px;
+  height: auto;
+  object-fit: contain;
+}
+
+.official-details {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.official-title {
+  font-family: var(--orbitron);
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin: 0;
+  letter-spacing: 0.05em;
+}
+
+.official-event {
+  font-family: var(--orbitron);
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.official-event-sub {
+  display: block;
+  font-size: 1.2rem;
+  color: var(--muted);
+  margin-top: 0.5rem;
+}
+
+.official-officiated {
+  margin: 1.5rem 0;
+  font-family: var(--inter);
+}
+
+.official-officiated p {
+  margin: 0.5rem 0;
+  color: var(--text);
+}
+
+.official-vip {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin: 0.7rem 0 !important;
+}
+
+.official-position {
+  color: var(--muted) !important;
+  font-size: 1.1rem;
+}
+
+.official-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+  font-family: var(--inter);
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.meta-icon {
+  font-size: 1.2rem;
+}
+
+.meta-text {
+  color: var(--text);
+  font-size: 1.1rem;
+}
+
+.meta-separator {
+  color: var(--primary);
+  margin: 0 0.5rem;
+}
+
+.official-slogan {
+  position: absolute;
+  bottom: 7rem; /* Adjust based on nav bar + footer height */
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--orbitron);
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--primary);
+  text-align: center;
+  letter-spacing: 0.1em;
+  z-index: 2;
+}
+
+/* Dark mode adjustments */
+body.dark-mode .official-content {
+  background: var(--surface);
+  border-color: var(--glass-border);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .official-backdrop-page {
+    padding: 2rem 0.5rem 6rem 0.5rem;
+  }
+
+  .official-content {
+    padding: 2rem 1rem;
+  }
+  
+  .official-slogan {
+    bottom: 5.5rem;
+    font-size: 1.2rem;
+  }
+}
+
+/* Ensure consistent footer positioning */
+.backdrop {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.footer {
+  margin-top: auto;
+  width: 100%;
+  position: relative;
+  z-index: 10;
 }
