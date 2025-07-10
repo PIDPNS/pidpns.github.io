@@ -341,20 +341,61 @@ document.addEventListener('DOMContentLoaded', function() {
     submitBtn.disabled = true;
     submitBtn.innerHTML = '<svg class="submit-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="10,8 16,12 10,16"/></svg><span>Sending...</span>';
 
-    // Insert message into Supabase
-    const { error } = await supabase.from('messages').insert([
-      { author, content }
-    ]);
+    try {
+      // Check if there's a photo to upload
+      let image_url = null;
+      if (photoInput && photoInput.files && photoInput.files.length > 0) {
+        const file = photoInput.files[0];
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`;
+        const filePath = `${author.replace(/\s+/g, '-').toLowerCase()}/${fileName}`;
+        
+        // Upload file to Supabase Storage
+         const { data: uploadData, error: uploadError } = await supabase.storage
+           .from('message-photos')
+           .upload(filePath, file, {
+             contentType: file.type,
+             upsert: false
+           });
 
-    // Restore button
-    submitBtn.disabled = false;
-    submitBtn.innerHTML = originalContent;
+        if (uploadError) {
+          console.error('Error uploading file:', uploadError);
+          alert('Failed to upload image. Please try again.');
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalContent;
+          return false;
+        }
 
-    if (error) {
-      alert('Failed to send message. Please try again.');
+        // Get the public URL for the uploaded file
+        const { data: { publicUrl } } = supabase.storage
+          .from('message-photos')
+          .getPublicUrl(filePath);
+
+        image_url = publicUrl;
+      }
+
+      // Insert message into Supabase with image_url if available
+      const { error } = await supabase.from('messages').insert([
+        { author, content, image_url }
+      ]);
+
+      // Restore button
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalContent;
+
+      if (error) {
+        console.error('Error inserting message:', error);
+        alert('Failed to send message. Please try again.');
+        return false;
+      }
+      return true;
+    } catch (err) {
+      console.error('Unexpected error:', err);
+      alert('An unexpected error occurred. Please try again.');
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalContent;
       return false;
     }
-    return true;
   }
 
   // Form submission
@@ -412,7 +453,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const messagesPopups = document.getElementById('messagesPopups');
   let supabaseMessagesSubscription = null;
 
-  function renderMessagePopup({ author, content, created_at }) {
+  function renderMessagePopup({ author, content, created_at, image_url }) {
     if (!messagesPopups) return;
     // Fade out title and status
     const liveTitle = document.getElementById('liveMessagesTitle');
@@ -422,12 +463,21 @@ document.addEventListener('DOMContentLoaded', function() {
     // Create popup element
     const popup = document.createElement('div');
     popup.className = 'message-popup show';
+    
+    // Prepare image HTML if image_url exists
+    const imageHtml = image_url ? `
+      <div class="message-image-container">
+        <img src="${image_url}" alt="${author}'s photo" class="message-image" />
+      </div>
+    ` : '';
+    
     popup.innerHTML = `
       <div class="message-content">
         <div class="message-header">
           <span class="message-author">${author}</span>
           <span class="message-time">${created_at ? new Date(created_at).toLocaleTimeString() : 'Just now'}</span>
         </div>
+        ${imageHtml}
         <div class="message-text">${content}</div>
       </div>
     `;
