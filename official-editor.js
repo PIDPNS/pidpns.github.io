@@ -82,7 +82,7 @@ class OfficialPageEditor {
       event_time: document.querySelector('.meta-item:first-child .meta-text:last-of-type')?.textContent || '',
       event_location: document.querySelector('.meta-item:last-child .meta-text')?.textContent || '',
       slogan: document.querySelector('.official-slogan')?.textContent || '',
-      logo_url: document.querySelector('.event-logo')?.src || ''
+      logo_url: document.querySelector('.event-logo')?.src || document.querySelector('.event-logo')?.getAttribute('src') || ''
     };
   }
 
@@ -111,257 +111,44 @@ class OfficialPageEditor {
     if (timeEl) timeEl.textContent = data.event_time;
     if (locationEl) locationEl.innerHTML = data.event_location.replace(/\n/g, '<br>');
     if (sloganEl) sloganEl.textContent = data.slogan;
-    if (logoEl) logoEl.src = data.logo_url;
+    if (logoEl && data.logo_url) logoEl.src = data.logo_url;
 
     this.originalContent = data;
   }
 
   setupEditToggle() {
-    // Add edit button to official page
-    const officialPage = document.querySelector('.official-backdrop-page');
-    if (!officialPage) return;
-
-    const editButton = document.createElement('button');
-    editButton.className = 'official-edit-btn';
-    editButton.innerHTML = `
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-      </svg>
-      <span>Edit Page</span>
-    `;
-    editButton.onclick = () => this.toggleEditMode();
-
-    officialPage.appendChild(editButton);
+    // Add inline edit functionality to each editable element
+    this.setupInlineEditing();
+    
+    // Add save button that appears when in edit mode
+    this.createSaveButton();
   }
 
   toggleEditMode() {
-    this.isEditMode = !this.isEditMode;
-    
-    if (this.isEditMode) {
-      this.showEditForm();
-    } else {
-      this.hideEditForm();
-    }
+    // This method is no longer needed with inline editing
+    // Content is edited directly in place
   }
 
   showEditForm() {
-    const officialContent = document.querySelector('.official-content');
-    if (!officialContent) return;
-
-    // Hide original content
-    const originalElements = officialContent.children;
-    Array.from(originalElements).forEach(el => {
-      if (!el.classList.contains('edit-form-container')) {
-        el.style.display = 'none';
-      }
-    });
-
-    // Create edit form
-    const formContainer = document.createElement('div');
-    formContainer.className = 'edit-form-container scroll-to-view';
-    formContainer.innerHTML = `
-      <div class="edit-form">
-        <h2 class="edit-form-title">Edit Official Page Content</h2>
-        
-        <div class="edit-form-grid">
-          <div class="form-group">
-            <label for="edit-title">Page Title</label>
-            <input type="text" id="edit-title" value="${this.originalContent.title || ''}" />
-          </div>
-
-          <div class="form-group">
-            <label for="edit-event-name">Event Name</label>
-            <input type="text" id="edit-event-name" value="${this.originalContent.event_name || ''}" />
-          </div>
-
-          <div class="form-group">
-            <label for="edit-event-subtitle">Event Subtitle</label>
-            <input type="text" id="edit-event-subtitle" value="${this.originalContent.event_subtitle || ''}" />
-          </div>
-
-          <div class="form-group">
-            <label for="edit-officiated-text">Officiated Text</label>
-            <input type="text" id="edit-officiated-text" value="${this.originalContent.officiated_text || ''}" />
-          </div>
-
-          <div class="form-group">
-            <label for="edit-vip-name">VIP Name</label>
-            <input type="text" id="edit-vip-name" value="${this.originalContent.vip_name || ''}" />
-          </div>
-
-          <div class="form-group">
-            <label for="edit-vip-position">VIP Position</label>
-            <input type="text" id="edit-vip-position" value="${this.originalContent.vip_position || ''}" />
-          </div>
-
-          <div class="form-group">
-            <label for="edit-event-date">Event Date</label>
-            <input type="text" id="edit-event-date" value="${this.originalContent.event_date || ''}" />
-          </div>
-
-          <div class="form-group">
-            <label for="edit-event-time">Event Time</label>
-            <input type="text" id="edit-event-time" value="${this.originalContent.event_time || ''}" />
-          </div>
-
-          <div class="form-group full-width">
-            <label for="edit-event-location">Event Location</label>
-            <textarea id="edit-event-location" rows="3">${this.originalContent.event_location || ''}</textarea>
-          </div>
-
-          <div class="form-group">
-            <label for="edit-slogan">Slogan</label>
-            <input type="text" id="edit-slogan" value="${this.originalContent.slogan || ''}" />
-          </div>
-
-          <div class="form-group">
-            <label for="edit-logo-url">Logo URL</label>
-            <input type="text" id="edit-logo-url" value="${this.originalContent.logo_url || ''}" />
-          </div>
-        </div>
-
-        <div class="edit-form-actions">
-          <button type="button" class="btn-cancel" onclick="officialEditor.cancelEdit()">Cancel</button>
-          <button type="button" class="btn-save" onclick="officialEditor.saveChanges()">Save Changes</button>
-        </div>
-      </div>
-    `;
-
-    officialContent.appendChild(formContainer);
-
-    // Scroll to the edit form smoothly
-    setTimeout(() => {
-      const officialPage = document.querySelector('.official-backdrop-page');
-      if (officialPage) {
-        officialPage.scrollTo({
-          top: 0,
-          behavior: 'smooth'
-        });
-      }
-    }, 100);
-
-    // Update edit button
-    const editBtn = document.querySelector('.official-edit-btn');
-    if (editBtn) {
-      editBtn.innerHTML = `
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="18" y1="6" x2="6" y2="18"/>
-          <line x1="6" y1="6" x2="18" y2="18"/>
-        </svg>
-        <span>Cancel</span>
-      `;
-    }
+    // This method is no longer needed with inline editing
+    // Individual elements are edited inline
   }
 
   hideEditForm() {
-    const formContainer = document.querySelector('.edit-form-container');
-    if (formContainer) {
-      formContainer.remove();
-    }
-
-    // Show original content
-    const officialContent = document.querySelector('.official-content');
-    if (officialContent) {
-      Array.from(officialContent.children).forEach(el => {
-        el.style.display = '';
-      });
-    }
-
-    // Scroll back to top to center the content
-    setTimeout(() => {
-      const officialPage = document.querySelector('.official-backdrop-page');
-      if (officialPage) {
-        officialPage.scrollTo({
-          top: 0,
-          behavior: 'smooth'
-        });
-      }
-    }, 100);
-
-    // Update edit button
-    const editBtn = document.querySelector('.official-edit-btn');
-    if (editBtn) {
-      editBtn.innerHTML = `
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-        </svg>
-        <span>Edit Page</span>
-      `;
-    }
+    // This method is no longer needed with inline editing
+    // No form overlay to hide
   }
 
   cancelEdit() {
-    this.isEditMode = false;
-    this.hideEditForm();
-  }
-
-  async saveChanges() {
-    const formData = {
-      title: document.getElementById('edit-title').value,
-      event_name: document.getElementById('edit-event-name').value,
-      event_subtitle: document.getElementById('edit-event-subtitle').value,
-      officiated_text: document.getElementById('edit-officiated-text').value,
-      vip_name: document.getElementById('edit-vip-name').value,
-      vip_position: document.getElementById('edit-vip-position').value,
-      event_date: document.getElementById('edit-event-date').value,
-      event_time: document.getElementById('edit-event-time').value,
-      event_location: document.getElementById('edit-event-location').value,
-      slogan: document.getElementById('edit-slogan').value,
-      logo_url: document.getElementById('edit-logo-url').value,
-      is_active: true,
-      updated_at: new Date().toISOString()
-    };
-
-    try {
-      // Show saving state
-      const saveBtn = document.querySelector('.btn-save');
-      if (saveBtn) {
-        saveBtn.innerHTML = 'Saving...';
-        saveBtn.disabled = true;
-      }
-
-      // Deactivate old content
-      await this.supabase
-        .from('official_page_content')
-        .update({ is_active: false })
-        .eq('is_active', true);
-
-      // Insert new content
-      const { data, error } = await this.supabase
-        .from('official_page_content')
-        .insert([formData])
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      // Update page content
-      this.updatePageContent(data);
-      
-      // Exit edit mode
-      this.isEditMode = false;
-      this.hideEditForm();
-
-      // Show success message
-      this.showNotification('Official page content updated successfully!', 'success');
-
-    } catch (error) {
-      console.error('Error saving content:', error);
-      this.showNotification('Failed to save content. Please try again.', 'error');
-      
-      // Reset save button
-      const saveBtn = document.querySelector('.btn-save');
-      if (saveBtn) {
-        saveBtn.innerHTML = 'Save Changes';
-        saveBtn.disabled = false;
-      }
-    }
+    // Cancel all active inline edits
+    const editingElements = document.querySelectorAll('.editing');
+    editingElements.forEach(element => {
+      this.cancelInlineEdit(element);
+    });
   }
 
   setupSaveFunction() {
-    // Make save function globally available
+    // Make functions globally available for inline editing
     window.officialEditor = this;
   }
 
@@ -383,6 +170,381 @@ class OfficialPageEditor {
         notification.remove();
       }
     }, 5000);
+  }
+
+  setupInlineEditing() {
+    // Define editable elements and their corresponding database fields
+    const editableElements = [
+      { selector: '.official-title', field: 'title', type: 'text' },
+      { selector: '.official-event', field: 'event_name', type: 'text', hasSubElement: true },
+      { selector: '.official-event-sub', field: 'event_subtitle', type: 'text' },
+      { selector: '.official-officiated p:first-child', field: 'officiated_text', type: 'text' },
+      { selector: '.official-vip', field: 'vip_name', type: 'text' },
+      { selector: '.official-position', field: 'vip_position', type: 'text' },
+      { selector: '.meta-item:first-child .meta-text:first-of-type', field: 'event_date', type: 'text' },
+      { selector: '.meta-item:first-child .meta-text:last-of-type', field: 'event_time', type: 'text' },
+      { selector: '.meta-item:last-child .meta-text', field: 'event_location', type: 'textarea' },
+      { selector: '.official-slogan', field: 'slogan', type: 'text' },
+      { selector: '.event-logo', field: 'logo_url', type: 'image' }
+    ];
+
+    editableElements.forEach(config => {
+      const element = document.querySelector(config.selector);
+      if (!element) return;
+
+      // Create edit container
+      const container = document.createElement('div');
+      container.className = 'editable-container';
+      
+      // Wrap the element
+      element.parentNode.insertBefore(container, element);
+      container.appendChild(element);
+
+      // Add edit button
+      const editBtn = document.createElement('button');
+      editBtn.className = 'inline-edit-btn';
+      
+      // Different icon for image editing
+      if (config.type === 'image') {
+        editBtn.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+            <circle cx="8.5" cy="8.5" r="1.5"/>
+            <polyline points="21,15 16,10 5,21"/>
+          </svg>
+        `;
+      } else {
+        editBtn.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+          </svg>
+        `;
+      }
+      
+      container.appendChild(editBtn);
+
+      // Add click event to edit button
+      editBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.startInlineEdit(element, config);
+      });
+
+      // Add hover effects
+      container.addEventListener('mouseenter', () => {
+        if (!element.classList.contains('editing')) {
+          editBtn.style.opacity = '1';
+        }
+      });
+
+      container.addEventListener('mouseleave', () => {
+        if (!element.classList.contains('editing')) {
+          editBtn.style.opacity = '0';
+        }
+      });
+    });
+  }
+
+  startInlineEdit(element, config) {
+    if (element.classList.contains('editing')) return;
+
+    element.classList.add('editing');
+    const container = element.parentNode;
+    const editBtn = container.querySelector('.inline-edit-btn');
+    
+    // Hide edit button
+    editBtn.style.opacity = '0';
+
+    // Get current text or image URL
+    let currentText = '';
+    if (config.type === 'image') {
+      currentText = element.src || element.getAttribute('src') || '';
+    } else if (config.hasSubElement && config.field === 'event_name') {
+      // For event name, get only the main text (excluding subtitle)
+      currentText = element.childNodes[0].textContent;
+    } else {
+      currentText = element.textContent.replace(/[""]/g, '').trim();
+    }
+
+    // Create input element
+    let input;
+    if (config.type === 'image') {
+      // Create a container for image editing
+      const imageEditContainer = document.createElement('div');
+      imageEditContainer.className = 'image-edit-container';
+      
+      // URL input for direct URL entry
+      input = document.createElement('input');
+      input.type = 'url';
+      input.placeholder = 'Enter image URL (e.g., assets/logo.png)';
+      input.value = currentText;
+      input.className = 'inline-edit-input';
+      
+      // File input for local file upload
+      const fileInput = document.createElement('input');
+      fileInput.type = 'file';
+      fileInput.accept = 'image/*';
+      fileInput.className = 'inline-file-input';
+      fileInput.style.display = 'none';
+      
+      // Upload button
+      const uploadBtn = document.createElement('button');
+      uploadBtn.type = 'button';
+      uploadBtn.className = 'upload-btn';
+      uploadBtn.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7,10 12,15 17,10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        Choose File
+      `;
+      
+      // Image preview
+      const preview = document.createElement('img');
+      preview.className = 'image-preview';
+      preview.src = currentText;
+      preview.style.maxWidth = '100px';
+      preview.style.maxHeight = '60px';
+      preview.style.objectFit = 'contain';
+      preview.style.border = '1px solid var(--glass-border)';
+      preview.style.borderRadius = '4px';
+      preview.style.marginTop = '0.5rem';
+      
+      // Handle file upload
+      uploadBtn.addEventListener('click', () => fileInput.click());
+      fileInput.addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          // For now, we'll use local file path - in production, you'd upload to Supabase Storage
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            const dataUrl = e.target.result;
+            input.value = dataUrl;
+            preview.src = dataUrl;
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+      
+      // Handle URL input changes
+      input.addEventListener('input', () => {
+        if (input.value) {
+          preview.src = input.value;
+        }
+      });
+      
+      imageEditContainer.appendChild(input);
+      imageEditContainer.appendChild(uploadBtn);
+      imageEditContainer.appendChild(fileInput);
+      imageEditContainer.appendChild(preview);
+      
+      input = imageEditContainer;
+    } else if (config.type === 'textarea') {
+      input = document.createElement('textarea');
+      input.rows = 2;
+      input.value = currentText.replace(/<br>/g, '\n');
+    } else {
+      input = document.createElement('input');
+      input.type = 'text';
+      input.value = currentText;
+    }
+
+    if (config.type !== 'image') {
+      input.className = 'inline-edit-input';
+      
+      // Style the input to match the original element
+      const computedStyle = window.getComputedStyle(element);
+      input.style.fontSize = computedStyle.fontSize;
+      input.style.fontFamily = computedStyle.fontFamily;
+      input.style.fontWeight = computedStyle.fontWeight;
+      input.style.color = computedStyle.color;
+      input.style.textAlign = computedStyle.textAlign;
+      input.style.width = '100%';
+      input.style.background = 'rgba(255, 255, 255, 0.1)';
+      input.style.border = '2px solid var(--primary)';
+      input.style.borderRadius = '4px';
+      input.style.padding = '0.25rem 0.5rem';
+      input.style.outline = 'none';
+    }
+
+    // Create action buttons
+    const actionContainer = document.createElement('div');
+    actionContainer.className = 'inline-edit-actions';
+    actionContainer.innerHTML = `
+      <button class="inline-save-btn" title="Save">
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20,6 9,17 4,12"/>
+        </svg>
+      </button>
+      <button class="inline-cancel-btn" title="Cancel">
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    `;
+
+    // Hide original element and show input
+    element.style.display = 'none';
+    container.appendChild(input);
+    container.appendChild(actionContainer);
+
+    // Focus input and select text
+    input.focus();
+    input.select();
+
+    // Handle save
+    actionContainer.querySelector('.inline-save-btn').addEventListener('click', () => {
+      const newValue = config.type === 'image' ? input.querySelector('input').value : input.value;
+      this.saveInlineEdit(element, config, newValue, currentText);
+    });
+
+    // Handle cancel
+    actionContainer.querySelector('.inline-cancel-btn').addEventListener('click', () => {
+      this.cancelInlineEdit(element);
+    });
+
+    // Handle Enter key (save) and Escape key (cancel) - only for non-image inputs
+    if (config.type !== 'image') {
+      const inputElement = config.type === 'textarea' ? input : input;
+      inputElement.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          const newValue = inputElement.value;
+          this.saveInlineEdit(element, config, newValue, currentText);
+        } else if (e.key === 'Escape') {
+          e.preventDefault();
+          this.cancelInlineEdit(element);
+        }
+      });
+    }
+
+    // Handle click outside to cancel
+    const handleClickOutside = (e) => {
+      if (!container.contains(e.target)) {
+        this.cancelInlineEdit(element);
+        document.removeEventListener('click', handleClickOutside);
+      }
+    };
+    setTimeout(() => document.addEventListener('click', handleClickOutside), 100);
+  }
+
+  async saveInlineEdit(element, config, newValue, oldValue) {
+    if (newValue.trim() === oldValue.trim()) {
+      this.cancelInlineEdit(element);
+      return;
+    }
+
+    const container = element.parentNode;
+    const saveBtn = container.querySelector('.inline-save-btn');
+    
+    // Show loading state
+    if (saveBtn) {
+      saveBtn.innerHTML = `
+        <div style="width: 12px; height: 12px; border: 2px solid transparent; border-top: 2px solid currentColor; border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
+      `;
+    }
+
+    try {
+      // Update the content in database
+      const updateData = {
+        [config.field]: newValue.trim(),
+        updated_at: new Date().toISOString()
+      };
+
+      // Deactivate old content
+      await this.supabase
+        .from('official_page_content')
+        .update({ is_active: false })
+        .eq('is_active', true);
+
+      // Insert new content with updated field
+      const newContent = { ...this.originalContent, ...updateData, is_active: true };
+      delete newContent.id; // Remove id so it creates a new record
+
+      const { data, error } = await this.supabase
+        .from('official_page_content')
+        .insert([newContent])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Update local content
+      this.originalContent = data;
+
+      // Update the display
+      this.updateElementContent(element, config, newValue);
+      this.cancelInlineEdit(element);
+
+      // Show success notification
+      this.showNotification('Content updated successfully!', 'success');
+
+    } catch (error) {
+      console.error('Error saving content:', error);
+      this.showNotification('Failed to save changes. Please try again.', 'error');
+      this.cancelInlineEdit(element);
+    }
+  }
+
+  updateElementContent(element, config, newValue) {
+    if (config.type === 'image') {
+      element.src = newValue;
+    } else if (config.hasSubElement && config.field === 'event_name') {
+      // For event name, preserve the subtitle
+      const subtitle = element.querySelector('.official-event-sub');
+      element.innerHTML = `${newValue} `;
+      if (subtitle) {
+        element.appendChild(subtitle);
+      }
+    } else if (config.field === 'event_location') {
+      element.innerHTML = newValue.replace(/\n/g, '<br>');
+    } else if (config.field === 'slogan') {
+      element.textContent = `"${newValue}"`;
+    } else {
+      element.textContent = newValue;
+    }
+  }
+
+  cancelInlineEdit(element) {
+    const container = element.parentNode;
+    const input = container.querySelector('.inline-edit-input');
+    const actions = container.querySelector('.inline-edit-actions');
+    const editBtn = container.querySelector('.inline-edit-btn');
+
+    // Remove input and actions
+    if (input) input.remove();
+    if (actions) actions.remove();
+
+    // Show original element
+    element.style.display = '';
+    element.classList.remove('editing');
+
+    // Reset edit button
+    if (editBtn) {
+      editBtn.style.opacity = '0';
+    }
+  }
+
+  createSaveButton() {
+    // Add a main save button that appears when content has been edited
+    const officialPage = document.querySelector('.official-backdrop-page');
+    if (!officialPage) return;
+
+    const saveAllButton = document.createElement('button');
+    saveAllButton.className = 'save-all-btn';
+    saveAllButton.innerHTML = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+        <polyline points="17,21 17,13 7,13 7,21"/>
+        <polyline points="7,3 7,8 15,8"/>
+      </svg>
+      <span>All Changes Saved</span>
+    `;
+    saveAllButton.style.display = 'none'; // Initially hidden
+
+    officialPage.appendChild(saveAllButton);
   }
 }
 
