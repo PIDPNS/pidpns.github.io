@@ -322,13 +322,17 @@ async function initializeAuth(supabaseClient) {
     // Use existing global auth manager or create new one
     if (!globalAuthManager) {
       globalAuthManager = new AuthManager(supabaseClient);
-      window.authManager = globalAuthManager; // Make it globally available
+      // Make it globally available immediately
+      window.authManager = globalAuthManager;
+      window.globalAuthManager = globalAuthManager;
     }
     
     const isAuthenticated = await globalAuthManager.init();
     
     if (isAuthenticated) {
       console.log('User authenticated:', globalAuthManager.getCurrentUser()?.email);
+      // Ensure global access is still available after init
+      window.authManager = globalAuthManager;
     }
     
     return isAuthenticated;

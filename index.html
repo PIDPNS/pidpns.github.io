@@ -424,49 +424,72 @@
       const userDisplayName = document.getElementById('userDisplayName');
       const userEmailDisplay = document.getElementById('userEmailDisplay');
 
-      if (!window.authManager) return;
-
-      // Update user info
-      const displayName = window.authManager.getUserDisplayName();
-      const email = window.authManager.getUserEmail();
-      const avatarUrl = window.authManager.getUserAvatar();
-
-      userDisplayName.textContent = displayName;
-      userEmailDisplay.textContent = email;
-
-      // Set avatar or initials
-      if (avatarUrl) {
-        userAvatar.src = avatarUrl;
-        userAvatar.style.display = 'block';
-        userInitials.style.display = 'none';
-      } else {
-        userAvatar.style.display = 'none';
-        userInitials.style.display = 'flex';
-        // Get initials from display name
-        const initials = displayName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-        userInitials.textContent = initials;
+      // Check both window.authManager and globalAuthManager
+      const authMgr = window.authManager || (typeof globalAuthManager !== 'undefined' ? globalAuthManager : null);
+      
+      if (!authMgr) {
+        console.warn('Auth manager not available for user menu setup');
+        // Set default values
+        if (userDisplayName) userDisplayName.textContent = 'User';
+        if (userEmailDisplay) userEmailDisplay.textContent = 'Loading...';
+        if (userInitials) userInitials.textContent = '?';
+        return;
       }
 
-      // Toggle dropdown
-      let isMenuOpen = false;
-      userMenuTrigger.addEventListener('click', (e) => {
-        e.stopPropagation();
-        isMenuOpen = !isMenuOpen;
-        userMenuDropdown.classList.toggle('show', isMenuOpen);
-      });
+      try {
+        // Update user info
+        const displayName = authMgr.getUserDisplayName();
+        const email = authMgr.getUserEmail();
+        const avatarUrl = authMgr.getUserAvatar();
 
-      // Close dropdown when clicking outside
-      document.addEventListener('click', () => {
-        if (isMenuOpen) {
-          isMenuOpen = false;
-          userMenuDropdown.classList.remove('show');
+        if (userDisplayName) userDisplayName.textContent = displayName || 'User';
+        if (userEmailDisplay) userEmailDisplay.textContent = email || 'No email';
+
+        // Set avatar or initials
+        if (avatarUrl && userAvatar) {
+          userAvatar.src = avatarUrl;
+          userAvatar.style.display = 'block';
+          if (userInitials) userInitials.style.display = 'none';
+        } else {
+          if (userAvatar) userAvatar.style.display = 'none';
+          if (userInitials) {
+            userInitials.style.display = 'flex';
+            // Get initials from display name
+            const initials = (displayName || 'U').split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+            userInitials.textContent = initials;
+          }
         }
-      });
 
-      // Prevent dropdown from closing when clicking inside
-      userMenuDropdown.addEventListener('click', (e) => {
-        e.stopPropagation();
-      });
+        // Toggle dropdown
+        if (userMenuTrigger && userMenuDropdown) {
+          let isMenuOpen = false;
+          userMenuTrigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            isMenuOpen = !isMenuOpen;
+            userMenuDropdown.classList.toggle('show', isMenuOpen);
+          });
+
+          // Close dropdown when clicking outside
+          document.addEventListener('click', () => {
+            if (isMenuOpen) {
+              isMenuOpen = false;
+              userMenuDropdown.classList.remove('show');
+            }
+          });
+
+          // Prevent dropdown from closing when clicking inside
+          userMenuDropdown.addEventListener('click', (e) => {
+            e.stopPropagation();
+          });
+        }
+        
+      } catch (error) {
+        console.error('Error setting up user menu:', error);
+        // Set fallback values
+        if (userDisplayName) userDisplayName.textContent = 'User';
+        if (userEmailDisplay) userEmailDisplay.textContent = 'Error loading';
+        if (userInitials) userInitials.textContent = '?';
+      }
     }
   </script>
 </body>
