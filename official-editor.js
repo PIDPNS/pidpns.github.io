@@ -66,6 +66,9 @@ class OfficialBackdropEditor {
     if (content.event_subtitle) {
       document.getElementById('officialEventSubtitle').textContent = content.event_subtitle;
     }
+    if (content.event_description) {
+      document.getElementById('officialEventDescription').textContent = content.event_description;
+    }
     if (content.officiated_text) {
       document.getElementById('officialOfficiatedText').textContent = content.officiated_text;
     }

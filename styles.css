@@ -2129,15 +2129,15 @@ body.dark-mode .editable-field.editing {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 1rem;
+  margin-bottom: 0.2rem;
   gap: 1rem;
   min-height: 140px;
   position: relative;
 }
 
 .logo-add-zone {
-  width: 60px;
-  height: 120px;
+  width: 100px;
+  height: 100px;
   position: relative;
   opacity: 0;
   transition: all var(--transition);
@@ -2202,18 +2202,13 @@ body.dark-mode .editable-field.editing {
 .editable-logo-container {
   position: relative;
   transition: all var(--transition);
-  min-width: 120px;
-  min-height: 120px;
+  min-width: 100px;
+  min-height: 100px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 12px;
   overflow: hidden;
-}
-
-.editable-logo-container:not(.main-logo) {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .editable-logo-container:hover {
@@ -2222,9 +2217,9 @@ body.dark-mode .editable-field.editing {
 }
 
 .event-logo {
-  width: 120px;
+  width: 100px;
   height: auto;
-  max-height: 120px;
+  max-height: 100px;
   object-fit: contain;
   transition: all var(--transition);
 }
@@ -2263,7 +2258,7 @@ body.dark-mode .editable-field.editing {
   text-align: center;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1rem;
 }
 
 .official-title {
@@ -2291,25 +2286,41 @@ body.dark-mode .editable-field.editing {
   margin-top: 0.5rem;
 }
 
+.official-description {
+  font-family: var(--inter);
+  font-size: 1.1rem;
+  font-weight: 400;
+  color: var(--text);
+  margin: 0.5rem 0 1rem 0;
+  line-height: 1.5;
+  opacity: 0.9;
+  transition: all var(--transition);
+}
+
+.official-description:hover {
+  opacity: 1;
+}
+
 .official-officiated {
-  margin: 1.2rem 0;
+  margin: 0.6rem 0;
   font-family: var(--inter);
 }
 
 .official-officiated p {
-  margin: 0.5rem 0;
+  margin: 0.3rem 0;
   color: var(--text);
 }
 
 .official-vip {
   font-size: 1.3rem;
   font-weight: 600;
-  margin: 0.7rem 0 !important;
+  margin: 0.5rem 0 !important;
 }
 
 .official-position {
   color: var(--muted) !important;
   font-size: 1.1rem;
+  margin-bottom: 0.3rem !important;
 }
 
 .official-meta {
@@ -2376,8 +2387,8 @@ body.dark-mode .official-content {
   }
 
   .logo-add-zone {
-    width: 50px;
-    height: 50px;
+    width: 80px;
+    height: 80px;
     order: 3; /* Move add zones below logos on mobile */
   }
 
