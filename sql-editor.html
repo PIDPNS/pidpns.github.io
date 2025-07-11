@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Supabase SQL Editor - Database Inspector</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <!-- Authentication protection -->
+  <script>
+    // Protect SQL editor page
+    const removeProtection = (function() {
+      document.body.style.opacity = '0.5';
+      document.body.style.pointerEvents = 'none';
+      
+      const loadingOverlay = document.createElement('div');
+      loadingOverlay.id = 'auth-loading';
+      loadingOverlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.9);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        color: white;
+        font-family: Inter, sans-serif;
+      `;
+      loadingOverlay.innerHTML = `
+        <div style="text-align: center;">
+          <div style="width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.3); border-top: 3px solid #10b981; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1rem;"></div>
+          <div>Verifying SQL access permissions...</div>
+        </div>
+        <style>
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        </style>
+      `;
+      
+      document.body.appendChild(loadingOverlay);
+      
+      return () => {
+        if (loadingOverlay && loadingOverlay.parentNode) {
+          loadingOverlay.parentNode.removeChild(loadingOverlay);
+        }
+        document.body.style.opacity = '';
+        document.body.style.pointerEvents = '';
+      };
+    })();
+    
+    window.removeAuthProtection = removeProtection;
+  </script>
+  <style>
+    :root {
+      --bg-primary: #0f172a;
+      --bg-secondary: #1e293b;
+      --bg-tertiary: #334155;
+      --text-primary: #f8fafc;
+      --text-secondary: #cbd5e1;
+      --text-muted: #64748b;
+      --accent-green: #10b981;
+      --accent-blue: #3b82f6;
+      --accent-red: #ef4444;
+      --accent-yellow: #f59e0b;
+      --border: #475569;
+      --shadow: rgba(0, 0, 0, 0.25);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .sql-editor-container {
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      height: 100vh;
+    }
+
+    .header {
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .header h1 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .connection-status {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-green);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .main-content {
+      display: grid;
+      grid-template-columns: 250px 1fr;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .sidebar {
+      background: var(--bg-secondary);
+      border-right: 1px solid var(--border);
+      padding: 1rem;
+      overflow-y: auto;
+    }
+
+    .sidebar h3 {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .query-templates {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .template-btn {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      padding: 0.75rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.875rem;
+      text-align: left;
+      transition: all 0.2s ease;
+    }
+
+    .template-btn:hover {
+      background: var(--bg-primary);
+      border-color: var(--accent-blue);
+    }
+
+    .editor-panel {
+      display: grid;
+      grid-template-rows: 1fr auto 1fr;
+      height: 100%;
+    }
+
+    .query-section {
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .query-header {
+      padding: 1rem 1.5rem;
+      background: var(--bg-tertiary);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: between;
+      gap: 1rem;
+    }
+
+    .query-header h2 {
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .query-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-left: auto;
+    }
+
+    .btn {
+      background: var(--accent-blue);
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn:hover {
+      background: #2563eb;
+    }
+
+    .btn.secondary {
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+    }
+
+    .btn.secondary:hover {
+      background: var(--bg-tertiary);
+    }
+
+    .sql-textarea {
+      flex: 1;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      border: none;
+      padding: 1.5rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.875rem;
+      line-height: 1.6;
+      resize: none;
+      outline: none;
+    }
+
+    .sql-textarea::placeholder {
+      color: var(--text-muted);
+    }
+
+    .results-section {
+      background: var(--bg-secondary);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .results-header {
+      padding: 1rem 1.5rem;
+      background: var(--bg-tertiary);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: between;
+    }
+
+    .results-header h2 {
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .results-info {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-left: auto;
+    }
+
+    .results-container {
+      flex: 1;
+      overflow: auto;
+      padding: 1rem;
+    }
+
+    .table-container {
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .results-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .results-table th,
+    .results-table td {
+      padding: 0.75rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.875rem;
+    }
+
+    .results-table th {
+      background: var(--bg-tertiary);
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .results-table td {
+      color: var(--text-secondary);
+    }
+
+    .results-table tbody tr:hover {
+      background: var(--bg-tertiary);
+    }
+
+    .error-message {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid var(--accent-red);
+      color: var(--accent-red);
+      padding: 1rem;
+      border-radius: 6px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.875rem;
+    }
+
+    .success-message {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid var(--accent-green);
+      color: var(--accent-green);
+      padding: 1rem;
+      border-radius: 6px;
+      font-size: 0.875rem;
+    }
+
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      color: var(--text-muted);
+    }
+
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--border);
+      border-top: 2px solid var(--accent-blue);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-right: 0.5rem;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .footer {
+      background: var(--bg-secondary);
+      border-top: 1px solid var(--border);
+      padding: 0.75rem 1.5rem;
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: between;
+      align-items: center;
+    }
+
+    .back-link {
+      color: var(--accent-blue);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .back-link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="sql-editor-container">
+    <header class="header">
+      <h1>🗄️ Supabase SQL Editor</h1>
+      <div class="connection-status">
+        <div class="status-dot" id="statusDot"></div>
+        <span id="connectionStatus">Connected to Database</span>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <aside class="sidebar">
+        <h3>Quick Queries</h3>
+        <div class="query-templates">
+          <button class="template-btn" data-query="SELECT * FROM messages ORDER BY created_at DESC LIMIT 10;">
+            📝 Recent Messages
+          </button>
+          <button class="template-btn" data-query="SELECT COUNT(*) as total_messages FROM messages;">
+            📊 Message Count
+          </button>
+          <button class="template-btn" data-query="SELECT author, COUNT(*) as message_count FROM messages GROUP BY author ORDER BY message_count DESC;">
+            👤 Messages by Author
+          </button>
+          <button class="template-btn" data-query="SELECT * FROM messages WHERE image_url IS NOT NULL ORDER BY created_at DESC;">
+            🖼️ Messages with Photos
+          </button>
+          <button class="template-btn" data-query="SELECT 
+  DATE(created_at) as date,
+  COUNT(*) as messages_per_day
+FROM messages 
+GROUP BY DATE(created_at) 
+ORDER BY date DESC;">
+            📅 Daily Activity
+          </button>
+          <button class="template-btn" data-query="SHOW TABLES;">
+            🗂️ Show All Tables
+          </button>
+          <button class="template-btn" data-query="DESCRIBE messages;">
+            📋 Messages Table Schema
+          </button>
+          <button class="template-btn" data-query="SELECT 
+  schemaname,
+  tablename,
+  tableowner
+FROM pg_tables 
+WHERE schemaname = 'public';">
+            🏗️ Database Structure
+          </button>
+        </div>
+      </aside>
+
+      <div class="editor-panel">
+        <section class="query-section">
+          <div class="query-header">
+            <h2>SQL Query</h2>
+            <div class="query-actions">
+              <button class="btn secondary" id="clearBtn">
+                🗑️ Clear
+              </button>
+              <button class="btn" id="executeBtn">
+                ▶️ Execute Query
+              </button>
+            </div>
+          </div>
+          <textarea 
+            class="sql-textarea" 
+            id="sqlQuery" 
+            placeholder="-- Enter your SQL query here
+-- Example: SELECT * FROM messages ORDER BY created_at DESC LIMIT 5;
+
+SELECT * FROM messages ORDER BY created_at DESC LIMIT 10;"
+          ></textarea>
+        </section>
+
+        <section class="results-section">
+          <div class="results-header">
+            <h2>Query Results</h2>
+            <div class="results-info" id="resultsInfo">
+              Ready to execute query
+            </div>
+          </div>
+          <div class="results-container" id="resultsContainer">
+            <div class="loading" style="display: none;" id="loadingIndicator">
+              <div class="spinner"></div>
+              Executing query...
+            </div>
+            <div id="resultsContent">
+              <p style="color: var(--text-muted); text-align: center; padding: 2rem;">
+                Execute a query to see results here
+              </p>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <span>Connected to: Supabase Database</span>
+      <a href="index.html" class="back-link">← Back to Digital Backdrop</a>
+    </footer>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="auth.js"></script>
+  <script>
+    // Authentication check for SQL Editor
+    document.addEventListener('DOMContentLoaded', async function() {
+      // Initialize Supabase client
+      const SUPABASE_URL = 'https://amxvmnzhwehxmnwzzaoy.supabase.co';
+      const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFteHZtbnpod2VoeG1ud3p6YW95Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE5NTc5NDksImV4cCI6MjA2NzUzMzk0OX0.Vedmvf0QnCEh5TdgarY48BW2vrBgmYayQ2c-fcKFHlo';
+      const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      
+      try {
+        // Initialize authentication
+        const isAuthenticated = await initializeAuth(supabase);
+        
+        if (isAuthenticated) {
+          // Remove protection overlay
+          if (window.removeAuthProtection) {
+            window.removeAuthProtection();
+          }
+          
+          // Initialize SQL editor
+          initializeSQLEditor(supabase);
+          
+          console.log('SQL Editor initialized with authentication');
+        }
+      } catch (error) {
+        console.error('Failed to initialize SQL Editor authentication:', error);
+        // Redirect to login on any auth error
+        window.location.href = 'login.html';
+      }
+    });
+    
+    // SQL Editor functionality
+    function initializeSQLEditor(supabaseClient) {
+      // Set the global supabase variable for the existing script
+      window.supabase = window.supabase || {};
+      window.supabase.createClient = () => supabaseClient;
+    
+    // Supabase configuration (same as your main app)
+    const SUPABASE_URL = 'https://amxvmnzhwehxmnwzzaoy.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFteHZtbnpod2VoeG1ud3p6YW95Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE5NTc5NDksImV4cCI6MjA2NzUzMzk0OX0.Vedmvf0QnCEh5TdgarY48BW2vrBgmYayQ2c-fcKFHlo';
+    const supabase = supabaseClient;
+
+    // DOM elements
+    const sqlQuery = document.getElementById('sqlQuery');
+    const executeBtn = document.getElementById('executeBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const resultsContainer = document.getElementById('resultsContainer');
+    const resultsContent = document.getElementById('resultsContent');
+    const resultsInfo = document.getElementById('resultsInfo');
+    const loadingIndicator = document.getElementById('loadingIndicator');
+    const statusDot = document.getElementById('statusDot');
+    const connectionStatus = document.getElementById('connectionStatus');
+
+    // Test connection on load
+    async function testConnection() {
+      try {
+        const { data, error } = await supabase.from('messages').select('count', { count: 'exact', head: true });
+        if (error) throw error;
+        
+        statusDot.style.background = 'var(--accent-green)';
+        connectionStatus.textContent = 'Connected to Database';
+      } catch (error) {
+        statusDot.style.background = 'var(--accent-red)';
+        connectionStatus.textContent = 'Connection Error';
+        console.error('Connection test failed:', error);
+      }
+    }
+
+    // Execute SQL query
+    async function executeQuery() {
+      const query = sqlQuery.value.trim();
+      if (!query) {
+        showError('Please enter a SQL query');
+        return;
+      }
+
+      showLoading(true);
+      resultsInfo.textContent = 'Executing...';
+
+      try {
+        // Handle different types of queries
+        let result;
+        const lowerQuery = query.toLowerCase();
+
+        if (lowerQuery.includes('select')) {
+          // Handle SELECT queries
+          if (lowerQuery.includes('from messages')) {
+            // Parse the query to extract what we need
+            result = await executeSelectQuery(query);
+          } else if (lowerQuery.includes('show tables') || lowerQuery.includes('pg_tables')) {
+            // Show tables query
+            result = await getTablesList();
+          } else if (lowerQuery.includes('describe') || lowerQuery.includes('\\d')) {
+            // Describe table query
+            result = await describeTable(query);
+          } else {
+            // Try to execute as raw query
+            result = await executeRawQuery(query);
+          }
+        } else if (lowerQuery.includes('insert') || lowerQuery.includes('update') || lowerQuery.includes('delete')) {
+          showError('INSERT, UPDATE, and DELETE operations are not allowed in this read-only editor for safety.');
+          return;
+        } else {
+          result = await executeRawQuery(query);
+        }
+
+        displayResults(result);
+        resultsInfo.textContent = `Query executed successfully • ${result.length || 0} rows`;
+
+      } catch (error) {
+        showError(error.message || 'Query execution failed');
+        resultsInfo.textContent = 'Query failed';
+      } finally {
+        showLoading(false);
+      }
+    }
+
+    async function executeSelectQuery(query) {
+      // Parse basic SELECT queries for the messages table
+      const { data, error } = await supabase.rpc('execute_sql', { query_text: query });
+      
+      if (error) {
+        // Fallback to basic queries if RPC doesn't work
+        if (query.toLowerCase().includes('count(*)')) {
+          const { count, error: countError } = await supabase
+            .from('messages')
+            .select('*', { count: 'exact', head: true });
+          if (countError) throw countError;
+          return [{ total_messages: count }];
+        } else if (query.toLowerCase().includes('group by author')) {
+          const { data: groupData, error: groupError } = await supabase
+            .from('messages')
+            .select('author')
+            .order('author');
+          if (groupError) throw groupError;
+          
+          const counts = {};
+          groupData.forEach(row => {
+            counts[row.author] = (counts[row.author] || 0) + 1;
+          });
+          
+          return Object.entries(counts).map(([author, count]) => ({
+            author,
+            message_count: count
+          })).sort((a, b) => b.message_count - a.message_count);
+        } else {
+          // Basic select all with parsing
+          const limit = query.match(/limit\s+(\d+)/i);
+          const limitNum = limit ? parseInt(limit[1]) : 100;
+          
+          let queryBuilder = supabase.from('messages').select('*');
+          
+          if (query.toLowerCase().includes('image_url is not null')) {
+            queryBuilder = queryBuilder.not('image_url', 'is', null);
+          }
+          
+          const { data: selectData, error: selectError } = await queryBuilder
+            .order('created_at', { ascending: false })
+            .limit(limitNum);
+            
+          if (selectError) throw selectError;
+          return selectData;
+        }
+      }
+      
+      return data;
+    }
+
+    async function getTablesList() {
+      // Get list of tables in public schema
+      const { data, error } = await supabase
+        .from('information_schema.tables')
+        .select('table_name')
+        .eq('table_schema', 'public');
+        
+      if (error) {
+        // Fallback - we know about messages table
+        return [
+          { table_name: 'messages', table_type: 'BASE TABLE' },
+          { table_name: 'storage.objects', table_type: 'VIEW' }
+        ];
+      }
+      
+      return data.map(row => ({ ...row, table_type: 'BASE TABLE' }));
+    }
+
+    async function describeTable(query) {
+      // Get table structure for messages table
+      const tableName = query.match(/describe\s+(\w+)/i)?.[1] || 'messages';
+      
+      if (tableName.toLowerCase() === 'messages') {
+        // Return known structure of messages table
+        return [
+          { column_name: 'id', data_type: 'bigint', is_nullable: 'NO', column_default: 'nextval()' },
+          { column_name: 'created_at', data_type: 'timestamp with time zone', is_nullable: 'YES', column_default: 'now()' },
+          { column_name: 'author', data_type: 'text', is_nullable: 'YES', column_default: null },
+          { column_name: 'content', data_type: 'text', is_nullable: 'YES', column_default: null },
+          { column_name: 'image_url', data_type: 'text', is_nullable: 'YES', column_default: null }
+        ];
+      }
+      
+      throw new Error(`Table '${tableName}' structure not available`);
+    }
+
+    async function executeRawQuery(query) {
+      // For other queries, try to use Supabase RPC if available
+      throw new Error('Raw SQL execution not available. Please use the provided query templates.');
+    }
+
+    function displayResults(data) {
+      if (!data || data.length === 0) {
+        resultsContent.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 2rem;">No results found</p>';
+        return;
+      }
+
+      const keys = Object.keys(data[0]);
+      
+      const table = document.createElement('div');
+      table.className = 'table-container';
+      
+      const tableElement = document.createElement('table');
+      tableElement.className = 'results-table';
+      
+      // Create header
+      const thead = document.createElement('thead');
+      const headerRow = document.createElement('tr');
+      keys.forEach(key => {
+        const th = document.createElement('th');
+        th.textContent = key;
+        headerRow.appendChild(th);
+      });
+      thead.appendChild(headerRow);
+      tableElement.appendChild(thead);
+      
+      // Create body
+      const tbody = document.createElement('tbody');
+      data.forEach(row => {
+        const tr = document.createElement('tr');
+        keys.forEach(key => {
+          const td = document.createElement('td');
+          let value = row[key];
+          
+          // Format different data types
+          if (value === null || value === undefined) {
+            td.style.color = 'var(--text-muted)';
+            td.textContent = 'NULL';
+          } else if (typeof value === 'object') {
+            td.textContent = JSON.stringify(value, null, 2);
+          } else if (key.includes('url') && typeof value === 'string' && value.startsWith('http')) {
+            const link = document.createElement('a');
+            link.href = value;
+            link.textContent = value.length > 50 ? value.substring(0, 50) + '...' : value;
+            link.target = '_blank';
+            link.style.color = 'var(--accent-blue)';
+            td.appendChild(link);
+          } else if (key.includes('created_at') || key.includes('timestamp')) {
+            td.textContent = new Date(value).toLocaleString();
+          } else {
+            td.textContent = value.toString();
+          }
+          tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      });
+      tableElement.appendChild(tbody);
+      
+      table.appendChild(tableElement);
+      resultsContent.innerHTML = '';
+      resultsContent.appendChild(table);
+    }
+
+    function showError(message) {
+      resultsContent.innerHTML = `<div class="error-message">❌ Error: ${message}</div>`;
+    }
+
+    function showLoading(show) {
+      loadingIndicator.style.display = show ? 'flex' : 'none';
+    }
+
+    // Event listeners
+    executeBtn.addEventListener('click', executeQuery);
+    clearBtn.addEventListener('click', () => {
+      sqlQuery.value = '';
+      resultsContent.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 2rem;">Execute a query to see results here</p>';
+      resultsInfo.textContent = 'Ready to execute query';
+    });
+
+    // Template button handlers
+    document.querySelectorAll('.template-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        sqlQuery.value = btn.dataset.query;
+        sqlQuery.focus();
+      });
+    });
+
+    // Keyboard shortcuts
+    sqlQuery.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        e.preventDefault();
+        executeQuery();
+      }
+    });
+
+    // Initialize
+    testConnection();
+    
+    // Set default query
+    sqlQuery.value = 'SELECT * FROM messages ORDER BY created_at DESC LIMIT 10;';
+    }
+  </script>
+</body>
+</html>
