@@ -343,12 +343,39 @@
         
         <!-- Main Content Section (Right Side) -->
         <div class="main-content-section">
-          <div class="official-logo">
-            <div class="editable-logo-container" data-field="logo_url">
-              <img src="assets/2.png" alt="Event Logo" class="event-logo" id="officialLogo">
-              <div class="logo-upload-overlay">
-                <div class="logo-upload-text">Click to change logo</div>
-                <input type="file" class="logo-file-input" accept="image/*" id="logoFileInput">
+          <div class="official-logos">
+            <!-- Left hover zone for adding logo -->
+            <div class="logo-add-zone left-zone" data-position="left">
+              <div class="logo-add-overlay">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19"/>
+                  <line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+                <span>Add Logo</span>
+                <input type="file" class="logo-add-input" accept="image/*">
+              </div>
+            </div>
+            
+            <!-- Logo container - dynamically centered -->
+            <div class="logos-container" id="logosContainer">
+              <div class="editable-logo-container main-logo" data-field="logo_url" data-logo-id="main">
+                <img src="assets/2.png" alt="Event Logo" class="event-logo" id="officialLogo">
+                <div class="logo-upload-overlay">
+                  <div class="logo-upload-text">Click to change logo</div>
+                  <input type="file" class="logo-file-input" accept="image/*" id="logoFileInput">
+                </div>
+              </div>
+            </div>
+            
+            <!-- Right hover zone for adding logo -->
+            <div class="logo-add-zone right-zone" data-position="right">
+              <div class="logo-add-overlay">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19"/>
+                  <line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+                <span>Add Logo</span>
+                <input type="file" class="logo-add-input" accept="image/*">
               </div>
             </div>
           </div>

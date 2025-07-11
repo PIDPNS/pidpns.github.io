@@ -122,6 +122,9 @@ class OfficialBackdropEditor {
       ministerFileInput.addEventListener('change', (e) => this.handleMinisterPhotoUpload(e));
     }
 
+    // Setup multi-logo functionality
+    this.setupMultiLogoFunctionality();
+
     // Setup editable fields
     this.setupEditableFields();
   }
@@ -434,6 +437,162 @@ class OfficialBackdropEditor {
 
     // Clear file input
     event.target.value = '';
+  }
+
+  setupMultiLogoFunctionality() {
+    // Setup logo add zones
+    const logoAddZones = document.querySelectorAll('.logo-add-zone');
+    logoAddZones.forEach(zone => {
+      const input = zone.querySelector('.logo-add-input');
+      if (input) {
+        input.addEventListener('change', (e) => this.handleLogoAdd(e, zone.dataset.position));
+      }
+    });
+  }
+
+  async handleLogoAdd(event, position) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    try {
+      this.showSaveIndicator();
+
+      // Upload to Supabase Storage
+      const fileName = `logo_${Date.now()}_${file.name}`;
+      const { data, error } = await this.supabase.storage
+        .from('logos')
+        .upload(fileName, file);
+
+      if (error) throw error;
+
+      // Get public URL
+      const { data: { publicUrl } } = this.supabase.storage
+        .from('logos')
+        .getPublicUrl(fileName);
+
+      // Add logo to the container
+      this.addLogoToContainer(publicUrl, position);
+
+      // Save to database (extend current content with additional logos)
+      await this.saveAdditionalLogos();
+
+      this.hideSaveIndicator();
+      
+      // Clear the input
+      event.target.value = '';
+
+    } catch (error) {
+      console.error('Error adding logo:', error);
+      this.hideSaveIndicator();
+      alert('Failed to add logo. Please try again.');
+    }
+  }
+
+  addLogoToContainer(logoUrl, position) {
+    const logosContainer = document.getElementById('logosContainer');
+    const logoId = `logo_${Date.now()}`;
+    
+    // Create new logo element
+    const logoElement = document.createElement('div');
+    logoElement.className = 'editable-logo-container additional-logo';
+    logoElement.dataset.logoId = logoId;
+    logoElement.innerHTML = `
+      <img src="${logoUrl}" alt="Additional Logo" class="event-logo">
+      <div class="logo-upload-overlay">
+        <div class="logo-upload-text">Click to change</div>
+        <input type="file" class="logo-file-input" accept="image/*">
+      </div>
+      <button class="logo-remove-btn" title="Remove logo">&times;</button>
+    `;
+
+    // Add event listeners for the new logo
+    const fileInput = logoElement.querySelector('.logo-file-input');
+    fileInput.addEventListener('change', (e) => this.handleLogoReplace(e, logoElement));
+    
+    const removeBtn = logoElement.querySelector('.logo-remove-btn');
+    removeBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.removeLogo(logoElement);
+    });
+
+    // Insert based on position
+    if (position === 'left') {
+      logosContainer.insertBefore(logoElement, logosContainer.firstChild);
+    } else {
+      logosContainer.appendChild(logoElement);
+    }
+
+    // Trigger entrance animation
+    setTimeout(() => {
+      logoElement.style.opacity = '1';
+      logoElement.style.transform = 'scale(1)';
+    }, 10);
+  }
+
+  async handleLogoReplace(event, logoElement) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    try {
+      this.showSaveIndicator();
+
+      // Upload new logo
+      const fileName = `logo_${Date.now()}_${file.name}`;
+      const { data, error } = await this.supabase.storage
+        .from('logos')
+        .upload(fileName, file);
+
+      if (error) throw error;
+
+      // Get public URL
+      const { data: { publicUrl } } = this.supabase.storage
+        .from('logos')
+        .getPublicUrl(fileName);
+
+      // Update the logo image
+      const img = logoElement.querySelector('.event-logo');
+      img.src = publicUrl;
+
+      // Save to database
+      await this.saveAdditionalLogos();
+
+      this.hideSaveIndicator();
+      event.target.value = '';
+
+    } catch (error) {
+      console.error('Error replacing logo:', error);
+      this.hideSaveIndicator();
+      alert('Failed to replace logo. Please try again.');
+    }
+  }
+
+  removeLogo(logoElement) {
+    // Animate out
+    logoElement.style.opacity = '0';
+    logoElement.style.transform = 'scale(0.8)';
+    
+    setTimeout(() => {
+      logoElement.remove();
+      this.saveAdditionalLogos();
+    }, 300);
+  }
+
+  async saveAdditionalLogos() {
+    // Get all current logos
+    const logoElements = document.querySelectorAll('.editable-logo-container .event-logo');
+    const logos = Array.from(logoElements).map(img => ({
+      url: img.src,
+      alt: img.alt
+    }));
+
+    // Update current content with additional logos
+    this.currentContent.additional_logos = logos.slice(1); // Exclude main logo
+
+    try {
+      await this.saveContent();
+    } catch (error) {
+      console.error('Error saving additional logos:', error);
+    }
   }
 
   showSaveIndicator(type, message = null) {

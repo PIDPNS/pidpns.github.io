@@ -2124,35 +2124,139 @@ body.dark-mode .editable-field.editing {
   box-shadow: none !important;
 }
 
-.official-logo {
+/* Official Logos Container - Multi-logo support with hover zones */
+.official-logos {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   margin-bottom: 1rem;
+  gap: 1rem;
+  min-height: 140px;
+  position: relative;
 }
 
-.official-slogan {
-  font-family: var(--orbitron);
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--primary);
-  margin: 1rem 0 0 0;
-  letter-spacing: 0.1em;
+.logo-add-zone {
+  width: 60px;
+  height: 120px;
+  position: relative;
+  opacity: 0;
+  transition: all var(--transition);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.official-details {
+.logo-add-zone:hover {
+  opacity: 1;
+}
+
+.logo-add-overlay {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.5rem;
-  background: none !important;
+  gap: 0.5rem;
+  background: rgba(52, 199, 89, 0.1);
+  border: 2px dashed var(--primary);
+  border-radius: 12px;
+  padding: 1rem;
+  width: 100%;
+  height: 100%;
+  color: var(--primary);
+  font-size: 0.8rem;
+  font-weight: 500;
+  transition: all var(--transition);
+  position: relative;
 }
 
-.official-logo {
-  margin-bottom: 1rem;
+.logo-add-overlay:hover {
+  background: rgba(52, 199, 89, 0.15);
+  border-color: var(--accent);
+}
+
+.logo-add-overlay svg {
+  width: 16px;
+  height: 16px;
+  stroke: var(--primary);
+}
+
+.logo-add-input {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.logos-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  min-height: 120px;
+}
+
+.editable-logo-container {
+  position: relative;
+  transition: all var(--transition);
+  min-width: 120px;
+  min-height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.editable-logo-container:not(.main-logo) {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.editable-logo-container:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
 }
 
 .event-logo {
   width: 120px;
   height: auto;
+  max-height: 120px;
   object-fit: contain;
+  transition: all var(--transition);
+}
+
+/* Logo removal functionality for additional logos */
+.editable-logo-container:not(.main-logo) .logo-remove-btn {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 24px;
+  height: 24px;
+  background: rgba(255, 59, 48, 0.9);
+  border: none;
+  border-radius: 50%;
+  color: white;
+  cursor: pointer;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  line-height: 1;
+  z-index: 5;
+  transition: all var(--transition);
+}
+
+.editable-logo-container:not(.main-logo):hover .logo-remove-btn {
+  display: flex;
+}
+
+.editable-logo-container:not(.main-logo) .logo-remove-btn:hover {
+  background: rgba(255, 59, 48, 1);
+  transform: scale(1.1);
 }
 
 .official-details {
@@ -2250,6 +2354,13 @@ body.dark-mode .editable-field.editing {
   z-index: 2;
 }
 
+/* Logo animations and responsive behavior */
+.editable-logo-container.additional-logo {
+  opacity: 0;
+  transform: scale(0.8);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
 /* Dark mode adjustments */
 body.dark-mode .official-content {
   background: var(--surface);
@@ -2258,77 +2369,49 @@ body.dark-mode .official-content {
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
-  .official-backdrop-page {
-    padding: 2rem 0.5rem 6rem 0.5rem;
-  }
-
-  .official-content {
+  .official-logos {
     flex-direction: column;
-    padding: 2rem 1rem;
-    gap: 2rem;
+    gap: 0.8rem;
+    min-height: auto;
   }
 
-  /* On mobile, minister photo section becomes relative positioned */
-  .minister-photo-section {
-    position: relative;
-    left: auto;
-    top: auto;
-    transform: none;
-    width: 250px;
-    max-width: 280px;
-    height: 320px;
+  .logo-add-zone {
+    width: 50px;
+    height: 50px;
+    order: 3; /* Move add zones below logos on mobile */
   }
 
-  /* Mobile layout adjustments */
-  .main-content-section {
-    margin-left: 0;
+  .logos-container {
     gap: 1rem;
+    order: 1;
   }
-  
-  .official-slogan {
-    font-size: 1.2rem;
-    margin-top: 1.5rem;
+
+  .left-zone {
+    order: 2;
   }
-  
-  /* Responsive design for official backdrop editing */
-  .edit-mode-toggle {
-    top: 10px;
-    right: 10px;
-    padding: 8px 12px;
-    font-size: 0.8rem;
+
+  .right-zone {
+    order: 4;
   }
-  
-  .save-indicator {
-    top: 15px;
-    right: 15px;
-    padding: 4px 8px;
-    font-size: 0.75rem;
+
+  .event-logo {
+    width: 80px;
+    max-height: 80px;
   }
-  
-  .editable-field:hover {
-    padding: 3px 5px;
-    margin: -3px -5px;
+
+  .editable-logo-container {
+    min-width: 80px;
+    min-height: 80px;
   }
-  
-  .editable-field.editing {
-    padding: 5px 7px;
-    margin: -5px -7px;
+
+  .logo-add-overlay {
+    padding: 0.5rem;
+    font-size: 0.7rem;
   }
-  
-  .editable-input,
-  .editable-textarea {
-    font-size: 14px;
-  }
-  
-  .logo-upload-text {
-    font-size: 0.75rem;
-  }
-  
-  /* Make edit icons slightly larger on mobile for touch */
-  .editable-field::after {
-    font-size: 12px;
-    top: -8px;
-    right: -8px;
+
+  .logo-add-overlay svg {
+    width: 12px;
+    height: 12px;
   }
 }
 
