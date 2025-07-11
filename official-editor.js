@@ -160,6 +160,22 @@ class OfficialBackdropEditor {
     if (content.minister_photo_url) {
       this.updateMinisterPhoto(content.minister_photo_url);
     }
+    
+    // Load additional logos if they exist
+    if (content.additional_logos && Array.isArray(content.additional_logos)) {
+      console.log('Loading additional logos:', content.additional_logos);
+      this.loadAdditionalLogos(content.additional_logos);
+    } else {
+      console.log('No additional logos found in content:', content.additional_logos);
+    }
+
+    // Load bottom logos if they exist
+    if (content.bottom_logos && Array.isArray(content.bottom_logos)) {
+      console.log('Loading bottom logos:', content.bottom_logos);
+      this.loadBottomLogos(content.bottom_logos);
+    } else {
+      console.log('No bottom logos found in content:', content.bottom_logos);
+    }
   }
 
   updateMinisterPhoto(photoUrl) {
@@ -510,25 +526,64 @@ class OfficialBackdropEditor {
   }
 
   setupMultiLogoFunctionality() {
-    // Setup logo add zones
-    const logoAddZones = document.querySelectorAll('.logo-add-zone');
-    logoAddZones.forEach(zone => {
+    // Setup top logo add zones
+    const logoAddZones = document.querySelectorAll('.logo-add-zone:not(.bottom-left-zone):not(.bottom-right-zone)');
+    console.log('Found top logo add zones:', logoAddZones.length);
+    
+    logoAddZones.forEach((zone, index) => {
       const input = zone.querySelector('.logo-add-input');
+      const position = zone.dataset.position;
+      console.log(`Top Zone ${index + 1}: position="${position}", input found:`, !!input);
+      
       if (input) {
-        input.addEventListener('change', (e) => this.handleLogoAdd(e, zone.dataset.position));
+        input.addEventListener('change', (e) => {
+          console.log(`Top logo upload triggered for position: ${position}`);
+          this.handleLogoAdd(e, position);
+        });
+      }
+    });
+
+    // Setup bottom logo add zones
+    const bottomLogoAddZones = document.querySelectorAll('.bottom-left-zone, .bottom-right-zone');
+    
+    bottomLogoAddZones.forEach((zone, index) => {
+      const input = zone.querySelector('.logo-add-input');
+      const position = zone.dataset.position;
+      
+      if (input) {
+        input.addEventListener('change', (e) => {
+          this.handleBottomLogoAdd(e, position);
+        });
       }
     });
   }
 
   async handleLogoAdd(event, position) {
     const file = event.target.files[0];
+    console.log(`handleLogoAdd called for position: ${position}, file:`, file?.name);
+    
     if (!file) return;
+
+    // Check for duplicate file names
+    const existingLogos = document.querySelectorAll('.editable-logo-container.additional-logo img');
+    const existingFileNames = Array.from(existingLogos).map(img => {
+      const url = img.src;
+      return url.substring(url.lastIndexOf('/') + 1);
+    });
+    
+    if (existingFileNames.some(name => name.includes(file.name.replace(/\.[^/.]+$/, "")))) {
+      alert('A logo with the same name already exists. Please choose a different logo.');
+      event.target.value = '';
+      return;
+    }
 
     try {
       this.showSaveIndicator();
 
       // Upload to Supabase Storage
       const fileName = `logo_${Date.now()}_${file.name}`;
+      console.log(`Uploading file: ${fileName} for position: ${position}`);
+      
       const { data, error } = await this.supabase.storage
         .from('logos')
         .upload(fileName, file);
@@ -540,7 +595,18 @@ class OfficialBackdropEditor {
         .from('logos')
         .getPublicUrl(fileName);
 
-      // Add logo to the container
+      console.log(`File uploaded successfully, public URL: ${publicUrl}`);
+
+      // Check if this URL already exists
+      const existingUrls = Array.from(existingLogos).map(img => img.src);
+      if (existingUrls.includes(publicUrl)) {
+        alert('This logo is already added.');
+        event.target.value = '';
+        this.hideSaveIndicator();
+        return;
+      }
+
+      // Add logo to the container at the specified position
       this.addLogoToContainer(publicUrl, position);
 
       // Save to database (extend current content with additional logos)
@@ -559,7 +625,15 @@ class OfficialBackdropEditor {
   }
 
   addLogoToContainer(logoUrl, position) {
+    console.log('Adding logo to container:', logoUrl, position);
     const logosContainer = document.getElementById('logosContainer');
+    console.log('Logos container found:', logosContainer);
+    
+    if (!logosContainer) {
+      console.error('Logos container not found!');
+      return;
+    }
+
     const logoId = `logo_${Date.now()}`;
     
     // Create new logo element
@@ -587,15 +661,19 @@ class OfficialBackdropEditor {
 
     // Insert based on position
     if (position === 'left') {
+      console.log('Inserting logo at left position (beginning of container)');
       logosContainer.insertBefore(logoElement, logosContainer.firstChild);
     } else {
+      console.log('Inserting logo at right position (end of container)');
       logosContainer.appendChild(logoElement);
     }
 
-    // Trigger entrance animation
+    console.log('Logo element added to container, current logo count:', logosContainer.children.length);
+
+    // Trigger entrance animation by adding the show class
     setTimeout(() => {
-      logoElement.style.opacity = '1';
-      logoElement.style.transform = 'scale(1)';
+      logoElement.classList.add('show');
+      console.log('Logo show class added');
     }, 10);
   }
 
@@ -648,59 +726,438 @@ class OfficialBackdropEditor {
   }
 
   async saveAdditionalLogos() {
-    // Get all current logos
-    const logoElements = document.querySelectorAll('.editable-logo-container .event-logo');
-    const logos = Array.from(logoElements).map(img => ({
-      url: img.src,
-      alt: img.alt
-    }));
+    // Get only additional logos (exclude the main logo) with position information
+    const logosContainer = document.getElementById('logosContainer');
+    const mainLogo = logosContainer.querySelector('.main-logo');
+    const additionalLogoElements = logosContainer.querySelectorAll('.editable-logo-container.additional-logo');
+    
+    const additionalLogos = Array.from(additionalLogoElements)
+      .filter(element => {
+        const img = element.querySelector('img');
+        return img && img.src && img.src.includes('supabase.co');
+      })
+      .map(element => {
+        const img = element.querySelector('img');
+        // Determine position based on DOM order relative to main logo
+        const allLogos = Array.from(logosContainer.children);
+        const mainLogoIndex = allLogos.indexOf(mainLogo);
+        const currentLogoIndex = allLogos.indexOf(element);
+        const position = currentLogoIndex < mainLogoIndex ? 'left' : 'right';
+        
+        return {
+          url: img.src,
+          position: position
+        };
+      });
+
+    console.log('Saving additional logos with positions:', additionalLogos);
+
+    // Remove duplicates based on URL
+    const uniqueAdditionalLogos = additionalLogos.filter((logo, index, self) => 
+      index === self.findIndex(l => l.url === logo.url)
+    );
+    
+    console.log('Unique additional logos:', uniqueAdditionalLogos);
 
     // Update current content with additional logos
-    this.currentContent.additional_logos = logos.slice(1); // Exclude main logo
+    this.currentContent.additional_logos = uniqueAdditionalLogos;
+
+    console.log('Additional logos to save:', this.currentContent.additional_logos);
 
     try {
-      await this.saveContent();
+      // Save to database using the same pattern as saveField
+      const { data, error } = await this.supabase
+        .from('official_page_content')
+        .update({ 
+          additional_logos: this.currentContent.additional_logos,
+          updated_at: new Date().toISOString()
+        })
+        .eq('is_active', true)
+        .select();
+
+      if (error) {
+        console.error('Error saving additional logos to database:', error);
+        this.showSaveIndicator('error', `Failed: ${error.message}`);
+        return;
+      }
+
+      if (!data || data.length === 0) {
+        console.warn('No rows updated when saving additional logos');
+        this.showSaveIndicator('error', 'No active record found');
+        return;
+      }
+
+      console.log('Additional logos saved successfully to database');
+      this.showSaveIndicator('success', 'Logos saved');
     } catch (error) {
       console.error('Error saving additional logos:', error);
+      this.showSaveIndicator('error', 'Failed to save logos');
     }
   }
 
-  showSaveIndicator(type, message = null) {
-    const indicator = document.getElementById('saveIndicator');
-    if (!indicator) return;
-
-    // Clear any existing timeout
-    if (this.saveTimeout) {
-      clearTimeout(this.saveTimeout);
+  async handleBottomLogoAdd(event, position) {
+    const file = event.target.files[0];
+    if (!file) {
+      return;
     }
 
-    indicator.className = 'save-indicator show';
+    // Validate file type and size
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file.');
+      event.target.value = '';
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) { // 5MB limit for bottom logos
+      alert('File too large (max 5MB).');
+      event.target.value = '';
+      return;
+    }
+
+    // Check for duplicate file names in bottom logos
+    const existingBottomLogos = document.querySelectorAll('.bottom-logo-container img');
+    const existingFileNames = Array.from(existingBottomLogos).map(img => {
+      const url = img.src;
+      return url.substring(url.lastIndexOf('/') + 1);
+    });
     
-    if (type === 'error') {
-      indicator.classList.add('error');
+    if (existingFileNames.some(name => name.includes(file.name.replace(/\.[^/.]+$/, "")))) {
+      alert('A bottom logo with the same name already exists. Please choose a different logo.');
+      event.target.value = '';
+      return;
+    }
+
+    try {
+      this.showSaveIndicator('saving', 'Uploading bottom logo...');
+
+      // Upload to Supabase Storage
+      const fileName = `bottom_logo_${Date.now()}_${file.name}`;
+      
+      const { data, error } = await this.supabase.storage
+        .from('logos')
+        .upload(fileName, file);
+
+      if (error) {
+        console.error('Storage upload error:', error);
+        throw error;
+      }
+
+      // Get public URL
+      const { data: { publicUrl } } = this.supabase.storage
+        .from('logos')
+        .getPublicUrl(fileName);
+
+      // Check if this URL already exists in bottom logos
+      const existingUrls = Array.from(existingBottomLogos).map(img => img.src);
+      if (existingUrls.includes(publicUrl)) {
+        alert('This bottom logo is already added.');
+        event.target.value = '';
+        return;
+      }
+
+      // Add logo to the bottom container at the specified position
+      this.addBottomLogoToContainer(publicUrl, position);
+
+      // Save to database
+      await this.saveBottomLogos();
+
+      this.showSaveIndicator('success', 'Bottom logo added');
+      
+      // Clear the input
+      event.target.value = '';
+
+    } catch (error) {
+      console.error('Error adding bottom logo:', error);
+      this.showSaveIndicator('error', `Failed: ${error.message || 'Unknown error'}`);
+    }
+  }
+
+  addBottomLogoToContainer(logoUrl, position) {
+    const bottomLogosContainer = document.getElementById('bottomLogosContainer');
+    
+    if (!bottomLogosContainer) {
+      console.error('Bottom logos container not found!');
+      return;
+    }
+
+    const logoId = `bottom_logo_${Date.now()}`;
+    
+    // Create new bottom logo element
+    const logoElement = document.createElement('div');
+    logoElement.className = 'bottom-logo-container additional-logo';
+    logoElement.dataset.logoId = logoId;
+    logoElement.innerHTML = `
+      <img src="${logoUrl}" alt="Bottom Logo" class="bottom-logo">
+      <div class="bottom-logo-upload-overlay">
+        <div class="logo-upload-text">Change</div>
+        <input type="file" class="logo-file-input" accept="image/*">
+      </div>
+      <button class="bottom-logo-remove-btn" title="Remove logo">&times;</button>
+    `;
+
+    // Add event listeners for the new bottom logo
+    const fileInput = logoElement.querySelector('.logo-file-input');
+    fileInput.addEventListener('change', (e) => this.handleBottomLogoReplace(e, logoElement));
+    
+    const removeBtn = logoElement.querySelector('.bottom-logo-remove-btn');
+    removeBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.removeBottomLogo(logoElement);
+    });
+
+    // Insert based on position
+    if (position === 'bottom-left') {
+      bottomLogosContainer.insertBefore(logoElement, bottomLogosContainer.firstChild);
     } else {
-      indicator.classList.remove('error');
+      bottomLogosContainer.appendChild(logoElement);
     }
 
-    const spinner = indicator.querySelector('.save-spinner');
-    const text = indicator.querySelector('span');
+    // Trigger entrance animation by adding the show class
+    setTimeout(() => {
+      logoElement.classList.add('show');
+    }, 10);
+  }
 
-    if (type === 'saving') {
-      spinner.style.display = 'block';
-      text.textContent = message || 'Saving...';
-    } else if (type === 'success') {
-      spinner.style.display = 'none';
-      text.textContent = message || 'Saved';
-    } else if (type === 'error') {
-      spinner.style.display = 'none';
-      text.textContent = message || 'Error';
+  async handleBottomLogoReplace(event, logoElement) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    try {
+      this.showSaveIndicator();
+
+      // Upload new file
+      const fileName = `bottom_logo_${Date.now()}_${file.name}`;
+      const { data, error } = await this.supabase.storage
+        .from('logos')
+        .upload(fileName, file);
+
+      if (error) throw error;
+
+      // Get public URL
+      const { data: { publicUrl } } = this.supabase.storage
+        .from('logos')
+        .getPublicUrl(fileName);
+
+      // Update the image source
+      const img = logoElement.querySelector('img');
+      img.src = publicUrl;
+
+      // Save to database
+      await this.saveBottomLogos();
+
+      this.hideSaveIndicator();
+      event.target.value = '';
+
+    } catch (error) {
+      console.error('Error replacing bottom logo:', error);
+      this.hideSaveIndicator();
+      alert('Failed to replace bottom logo. Please try again.');
+    }
+  }
+
+  async removeBottomLogo(logoElement) {
+    try {
+      // Get the logo URL before removing the element
+      const img = logoElement.querySelector('img');
+      const logoUrl = img ? img.src : null;
+      
+      // Extract filename from URL for storage deletion
+      let fileName = null;
+      if (logoUrl && logoUrl.includes('supabase.co')) {
+        fileName = logoUrl.substring(logoUrl.lastIndexOf('/') + 1);
+      }
+
+      // Animate out
+      logoElement.style.opacity = '0';
+      logoElement.style.transform = 'scale(0.8)';
+      
+      setTimeout(async () => {
+        // Remove from DOM
+        logoElement.remove();
+        
+        // Save updated logos to database
+        await this.saveBottomLogos();
+        
+        // Delete file from Supabase Storage
+        if (fileName) {
+          try {
+            const { error } = await this.supabase.storage
+              .from('logos')
+              .remove([fileName]);
+              
+            if (error) {
+              console.error('Error deleting logo file from storage:', error);
+            } else {
+              console.log('Logo file deleted from storage:', fileName);
+            }
+          } catch (storageError) {
+            console.error('Failed to delete from storage:', storageError);
+          }
+        }
+        
+        this.showSaveIndicator('success', 'Bottom logo removed');
+      }, 300);
+      
+    } catch (error) {
+      console.error('Error removing bottom logo:', error);
+      this.showSaveIndicator('error', 'Failed to remove logo');
+    }
+  }
+
+  async saveBottomLogos() {
+    // Get only bottom logos with position information
+    const bottomLogosContainer = document.getElementById('bottomLogosContainer');
+    const bottomLogoElements = bottomLogosContainer.querySelectorAll('.bottom-logo-container');
+    
+    const bottomLogos = Array.from(bottomLogoElements)
+      .filter(element => {
+        const img = element.querySelector('img');
+        return img && img.src && img.src.includes('supabase.co');
+      })
+      .map(element => {
+        const img = element.querySelector('img');
+        // Determine position based on DOM order in bottom container
+        const allBottomLogos = Array.from(bottomLogosContainer.children);
+        const currentLogoIndex = allBottomLogos.indexOf(element);
+        const position = currentLogoIndex === 0 ? 'bottom-left' : 'bottom-right';
+        
+        return {
+          url: img.src,
+          position: position
+        };
+      });
+
+    console.log('Saving bottom logos with positions:', bottomLogos);
+
+    // Remove duplicates based on URL
+    const uniqueBottomLogos = bottomLogos.filter((logo, index, self) => 
+      index === self.findIndex(l => l.url === logo.url)
+    );
+    
+    console.log('Unique bottom logos:', uniqueBottomLogos);
+
+    // Update current content with bottom logos
+    this.currentContent.bottom_logos = uniqueBottomLogos;
+
+    console.log('Bottom logos to save:', this.currentContent.bottom_logos);
+
+    try {
+      // First, let's try to see if the column exists by checking the current content
+      console.log('Current content before saving bottom logos:', this.currentContent);
+      
+      // Save to database
+      const { data, error } = await this.supabase
+        .from('official_page_content')
+        .update({ 
+          bottom_logos: this.currentContent.bottom_logos,
+          updated_at: new Date().toISOString()
+        })
+        .eq('is_active', true)
+        .select();
+
+      if (error) {
+        console.error('Error saving bottom logos to database:', error);
+        console.error('Error details:', error.details, error.hint, error.message);
+        
+        // If column doesn't exist, let's try to save without it for now
+        if (error.message.includes('column "bottom_logos" does not exist')) {
+          console.log('bottom_logos column does not exist, need to run database migration');
+          alert('Database needs to be updated with bottom_logos column. Please run the database setup script.');
+          throw new Error('Database column missing: bottom_logos');
+        } else {
+          console.error('Database save error:', error);
+          throw new Error(`Database error: ${error.message}`);
+        }
+      }
+
+      if (!data || data.length === 0) {
+        console.warn('No rows updated when saving bottom logos');
+        this.showSaveIndicator('error', 'No active record found');
+        return;
+      }
+
+      console.log('Bottom logos saved successfully to database');
+      this.showSaveIndicator('success', 'Bottom logos saved');
+    } catch (error) {
+      console.error('Error saving bottom logos:', error);
+      this.showSaveIndicator('error', 'Failed to save bottom logos');
+    }
+  }
+
+  loadBottomLogos(bottomLogos) {
+    const bottomLogosContainer = document.getElementById('bottomLogosContainer');
+    if (!bottomLogosContainer || !bottomLogos || bottomLogos.length === 0) {
+      return;
     }
 
-    // Auto-hide after delay
-    const hideDelay = type === 'error' ? 3000 : 1500;
-    this.saveTimeout = setTimeout(() => {
-      indicator.classList.remove('show');
-    }, hideDelay);
+    // Clear existing bottom logos
+    const existingBottomLogos = bottomLogosContainer.querySelectorAll('.bottom-logo-container');
+    existingBottomLogos.forEach(logo => logo.remove());
+
+    // Handle both old format (array of strings) and new format (array of objects)
+    bottomLogos.forEach((logoData, index) => {
+      let logoUrl, position;
+      
+      if (typeof logoData === 'string') {
+        // Old format - just URL, default to right
+        logoUrl = logoData;
+        position = 'bottom-right';
+      } else if (typeof logoData === 'object' && logoData.url) {
+        // New format - object with url and position
+        logoUrl = logoData.url;
+        position = logoData.position || 'bottom-right';
+      } else {
+        console.warn('Invalid bottom logo data:', logoData);
+        return;
+      }
+      
+      // Check if the image URL is accessible before adding
+      this.checkImageAndLoad(logoUrl, position);
+    });
+  }
+
+  // Helper function to check if image exists before loading
+  checkImageAndLoad(logoUrl, position) {
+    const img = new Image();
+    img.onload = () => {
+      // Image loaded successfully, add to container
+      this.addBottomLogoToContainer(logoUrl, position);
+    };
+    img.onerror = () => {
+      // Image failed to load, skip it and clean from database
+      console.warn(`Bottom logo image failed to load: ${logoUrl}`);
+      this.cleanupBrokenBottomLogos();
+    };
+    img.src = logoUrl;
+    
+    // Set a timeout to avoid hanging on slow/broken images
+    setTimeout(() => {
+      if (!img.complete) {
+        console.warn(`Bottom logo image timeout: ${logoUrl}`);
+        this.cleanupBrokenBottomLogos();
+      }
+    }, 5000); // 5 second timeout
+  }
+
+  // Clean up broken logos from database
+  async cleanupBrokenBottomLogos() {
+    try {
+      // Get current working logos
+      const bottomLogosContainer = document.getElementById('bottomLogosContainer');
+      const workingLogos = Array.from(bottomLogosContainer.querySelectorAll('.bottom-logo-container img'))
+        .map(img => ({
+          url: img.src,
+          position: 'bottom-right' // Default position for cleanup
+        }));
+      
+      // Update database with only working logos
+      if (this.currentContent.bottom_logos !== workingLogos) {
+        this.currentContent.bottom_logos = workingLogos;
+        await this.saveBottomLogos();
+      }
+    } catch (error) {
+      console.error('Error cleaning up broken bottom logos:', error);
+    }
   }
 
   // Presentation Mode - Double-click to hide/show navigation
@@ -773,6 +1230,89 @@ class OfficialBackdropEditor {
   async refreshContent() {
     await this.loadContent();
   }
+
+  loadAdditionalLogos(additionalLogos) {
+    const logosContainer = document.getElementById('logosContainer');
+    if (!logosContainer || !additionalLogos || additionalLogos.length === 0) {
+      return;
+    }
+
+    // Clear existing additional logos (keep the main logo)
+    const existingAdditionalLogos = logosContainer.querySelectorAll('.editable-logo-container.additional-logo');
+    existingAdditionalLogos.forEach(logo => logo.remove());
+
+    // Handle both old format (array of strings) and new format (array of objects)
+    additionalLogos.forEach((logoData, index) => {
+      let logoUrl, position;
+      
+      if (typeof logoData === 'string') {
+        // Old format - just URL, default to right
+        logoUrl = logoData;
+        position = 'right';
+      } else if (typeof logoData === 'object' && logoData.url) {
+        // New format - object with url and position
+        logoUrl = logoData.url;
+        position = logoData.position || 'right';
+      } else {
+        console.warn('Invalid logo data:', logoData);
+        return;
+      }
+      
+      console.log(`Loading logo: ${logoUrl} at position: ${position}`);
+      this.addLogoToContainer(logoUrl, position);
+    });
+  }
+
+  showSaveIndicator(type, message = null) {
+    const indicator = document.getElementById('saveIndicator');
+    if (!indicator) return;
+
+    // Clear any existing timeout
+    if (this.saveTimeout) {
+      clearTimeout(this.saveTimeout);
+    }
+
+    indicator.className = 'save-indicator show';
+    
+    if (type === 'error') {
+      indicator.classList.add('error');
+    } else {
+      indicator.classList.remove('error');
+    }
+
+    const spinner = indicator.querySelector('.save-spinner');
+    const text = indicator.querySelector('span');
+
+    if (type === 'saving') {
+      spinner.style.display = 'block';
+      text.textContent = message || 'Saving...';
+    } else if (type === 'success') {
+      spinner.style.display = 'none';
+      text.textContent = message || 'Saved';
+    } else if (type === 'error') {
+      spinner.style.display = 'none';
+      text.textContent = message || 'Error';
+    }
+
+    // Auto-hide after delay
+    const hideDelay = type === 'error' ? 3000 : 1500;
+    this.saveTimeout = setTimeout(() => {
+      indicator.classList.remove('show');
+    }, hideDelay);
+  }
+
+  hideSaveIndicator() {
+    const indicator = document.getElementById('saveIndicator');
+    if (!indicator) return;
+
+    // Clear any existing timeout
+    if (this.saveTimeout) {
+      clearTimeout(this.saveTimeout);
+    }
+
+    indicator.classList.remove('show');
+  }
+
 }
 
 // Global variable for the editor instance

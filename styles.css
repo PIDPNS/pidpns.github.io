@@ -383,8 +383,6 @@ body.dark-mode .icon-moon {
   -webkit-backdrop-filter: blur(20px);
   text-align: center;
   z-index: 3;
-  overflow: hidden;
-  color: var(--text);
 }
 
 .event-info[data-screen="main"] {
@@ -2388,6 +2386,11 @@ body.dark-mode .official-slogan {
   transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
+.editable-logo-container.additional-logo.show {
+  opacity: 1;
+  transform: scale(1);
+}
+
 /* Dark mode adjustments */
 body.dark-mode .official-content {
   background: var(--surface);
@@ -2788,4 +2791,258 @@ body.dark-mode .official-content {
 
 .official-backdrop-page.nav-hidden {
   height: 100vh;
+}
+
+/* Ensure both left and right logo add zones are functional */
+.official-logos .left-zone,
+.official-logos .right-zone {
+  pointer-events: auto;
+  z-index: 10;
+}
+
+.official-logos .left-zone:hover,
+.official-logos .right-zone:hover {
+  opacity: 1 !important;
+}
+
+/* Make logo add zones more visible for debugging */
+.logo-add-zone {
+  border: 1px solid transparent;
+}
+
+.logo-add-zone:hover {
+  border-color: var(--primary);
+  background: rgba(52, 199, 89, 0.05);
+}
+
+/* Bottom Logo Section - Below Slogan */
+.bottom-logos-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 1rem 0 0 0;
+  gap: 0.5rem;
+  min-height: 0; /* No space when empty */
+  position: relative;
+  transition: all var(--transition);
+  background: transparent;
+}
+
+.bottom-logos-section:hover {
+  min-height: 80px; /* Show space when hovering */
+}
+
+.bottom-logos-section:has(.bottom-logos-container:not(:empty)) {
+  min-height: 80px; /* Always show space when has logos */
+}
+
+.bottom-logos-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+  background: transparent;
+}
+
+/* Bottom logo add zones - scaled up to match larger logos */
+.bottom-left-zone,
+.bottom-right-zone {
+  width: 80px;
+  height: 80px;
+  opacity: 0;
+  transition: all var(--transition);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bottom-logos-section:hover .bottom-left-zone,
+.bottom-logos-section:hover .bottom-right-zone {
+  opacity: 1;
+}
+
+.bottom-left-zone .logo-add-overlay,
+.bottom-right-zone .logo-add-overlay {
+  padding: 0.5rem;
+  font-size: 0.7rem;
+  width: 100%;
+  height: 100%;
+}
+
+.bottom-left-zone .logo-add-overlay svg,
+.bottom-right-zone .logo-add-overlay svg {
+  width: 12px;
+  height: 12px;
+}
+
+/* Bottom logo containers - 60% size of top logos */
+.bottom-logo-container {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+}
+
+.bottom-logo-container img {
+  width: 80px; /* Scaled up from 60px for better visibility */
+  height: 80px;
+  object-fit: contain;
+  border-radius: 8px;
+  transition: all var(--transition);
+  background: transparent !important;
+  padding: 0.3rem;
+}
+
+.bottom-logo-container:hover img {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* Bottom logo remove button */
+.bottom-logo-remove-btn {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: none;
+  background: #FF3B30;
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  opacity: 0;
+  transition: all var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.bottom-logo-container:hover .bottom-logo-remove-btn {
+  opacity: 1;
+}
+
+.bottom-logo-remove-btn:hover {
+  background: #FF1F0F;
+  transform: scale(1.1);
+}
+
+/* Bottom logo upload overlay */
+.bottom-logo-upload-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(52, 199, 89, 0.9);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: all var(--transition);
+  border-radius: 8px;
+  font-size: 0.7rem;
+  font-weight: 500;
+}
+
+.bottom-logo-container:hover .bottom-logo-upload-overlay {
+  opacity: 1;
+}
+
+.bottom-logo-upload-overlay input[type="file"] {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+/* Animation for new bottom logos */
+.bottom-logo-container.additional-logo {
+  opacity: 0;
+  transform: scale(0.8);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.bottom-logo-container.additional-logo.show {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Responsive adjustments for bottom logos */
+@media (max-width: 768px) {
+  .bottom-logos-section {
+    gap: 0.3rem;
+  }
+  
+  .bottom-left-zone,
+  .bottom-right-zone {
+    width: 65px;
+    height: 65px;
+  }
+  
+  .bottom-logo-container img {
+    width: 65px; /* Scaled up from 50px for mobile */
+    height: 65px;
+  }
+  
+  .bottom-logos-section:hover,
+  .bottom-logos-section:has(.bottom-logos-container:not(:empty)) {
+    min-height: 60px;
+  }
+}
+
+/* Ensure bottom logo file inputs are clickable */
+.bottom-left-zone .logo-add-input,
+.bottom-right-zone .logo-add-input {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 5;
+}
+
+.bottom-left-zone,
+.bottom-right-zone {
+  position: relative;
+  pointer-events: auto;
+}
+
+.bottom-logos-section .logo-add-overlay {
+  pointer-events: none; /* Let clicks pass through to the input */
+}
+
+.bottom-logos-section .logo-add-input {
+  pointer-events: auto; /* But allow the input to be clickable */
+}
+
+/* Ensure complete transparency for bottom logo area */
+.bottom-logos-section,
+.bottom-logos-section::before,
+.bottom-logos-section::after,
+.bottom-logos-container,
+.bottom-logos-container::before,
+.bottom-logos-container::after,
+.bottom-logo-container,
+.bottom-logo-container::before,
+.bottom-logo-container::after {
+  background: none !important;
+  background-color: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
+  border: none !important;
+  outline: none !important;
 }
