@@ -7,20 +7,39 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 // Global Supabase client instance
 let supabaseClient = null;
+let isClientInitialized = false;
 
 // Initialize Supabase client (singleton pattern)
 function getSupabaseClient() {
-  if (!supabaseClient) {
-    if (typeof window !== 'undefined' && window.supabase) {
+  // Prevent multiple initializations
+  if (isClientInitialized && supabaseClient) {
+    return supabaseClient;
+  }
+  
+  if (typeof window !== 'undefined' && window.supabase && !isClientInitialized) {
+    try {
       supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-      console.log('Supabase client initialized');
-    } else {
-      console.error('Supabase library not loaded');
+      isClientInitialized = true;
+      console.log('Supabase client initialized (singleton)');
+      return supabaseClient;
+    } catch (error) {
+      console.error('Failed to create Supabase client:', error);
       return null;
     }
+  } else if (isClientInitialized) {
+    return supabaseClient;
+  } else {
+    console.error('Supabase library not loaded or client already initialized');
+    return null;
   }
-  return supabaseClient;
+}
+
+// Reset function for development/testing
+function resetSupabaseClient() {
+  supabaseClient = null;
+  isClientInitialized = false;
 }
 
 // Export for use in other scripts
 window.getSupabaseClient = getSupabaseClient;
+window.resetSupabaseClient = resetSupabaseClient;

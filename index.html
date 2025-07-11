@@ -366,6 +366,9 @@
             window.removeAuthProtection();
           }
           
+          // Set up sign out functionality
+          setupSignOutButtons();
+          
           // Initialize user menu
           setupUserMenu();
           
@@ -421,12 +424,12 @@
       const userDisplayName = document.getElementById('userDisplayName');
       const userEmailDisplay = document.getElementById('userEmailDisplay');
 
-      if (!authManager) return;
+      if (!window.authManager) return;
 
       // Update user info
-      const displayName = authManager.getUserDisplayName();
-      const email = authManager.getUserEmail();
-      const avatarUrl = authManager.getUserAvatar();
+      const displayName = window.authManager.getUserDisplayName();
+      const email = window.authManager.getUserEmail();
+      const avatarUrl = window.authManager.getUserAvatar();
 
       userDisplayName.textContent = displayName;
       userEmailDisplay.textContent = email;
