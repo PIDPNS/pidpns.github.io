@@ -330,9 +330,14 @@
           </div>
           <div class="official-meta">
             <div class="meta-item">
-              <span class="meta-text datetime-combined">24 Jun 2023 (Sabtu) | 🕗 08:00 Pagi</span>
+              <span class="meta-icon">🗓️</span>
+              <span class="meta-text">24 Jun 2023 (Sabtu)</span>
+              <span class="meta-separator">|</span>
+              <span class="meta-icon">🕗</span>
+              <span class="meta-text">08:00 Pagi</span>
             </div>
             <div class="meta-item">
+              <span class="meta-icon">📍</span>
               <span class="meta-text">Taman Ujana Rimba Tropika & Dewan Mataking,<br>Ibu Pejabat Perpustakaan Negeri Sabah</span>
             </div>
           </div>
@@ -342,21 +347,18 @@
     </div>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase-client.js"></script>
   <script src="auth.js"></script>
   <script src="official-editor.js"></script>
   <script src="script.js"></script>
   <script>
     // Initialize authentication before anything else
     document.addEventListener('DOMContentLoaded', async function() {
+      // Initialize Supabase client
+      const SUPABASE_URL = 'https://amxvmnzhwehxmnwzzaoy.supabase.co';
+      const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFteHZtbnpod2VoeG1ud3p6YW95Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE5NTc5NDksImV4cCI6MjA2NzUzMzk0OX0.Vedmvf0QnCEh5TdgarY48BW2vrBgmYayQ2c-fcKFHlo';
+      const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      
       try {
-        // Get the single Supabase client instance
-        const supabase = getSupabaseClient();
-        
-        if (!supabase) {
-          throw new Error('Failed to initialize Supabase client');
-        }
-        
         // Initialize authentication
         const isAuthenticated = await initializeAuth(supabase);
         
@@ -365,9 +367,6 @@
           if (window.removeAuthProtection) {
             window.removeAuthProtection();
           }
-          
-          // Set up sign out functionality
-          setupSignOutButtons();
           
           // Initialize user menu
           setupUserMenu();
@@ -424,72 +423,49 @@
       const userDisplayName = document.getElementById('userDisplayName');
       const userEmailDisplay = document.getElementById('userEmailDisplay');
 
-      // Check both window.authManager and globalAuthManager
-      const authMgr = window.authManager || (typeof globalAuthManager !== 'undefined' ? globalAuthManager : null);
-      
-      if (!authMgr) {
-        console.warn('Auth manager not available for user menu setup');
-        // Set default values
-        if (userDisplayName) userDisplayName.textContent = 'User';
-        if (userEmailDisplay) userEmailDisplay.textContent = 'Loading...';
-        if (userInitials) userInitials.textContent = '?';
-        return;
+      if (!authManager) return;
+
+      // Update user info
+      const displayName = authManager.getUserDisplayName();
+      const email = authManager.getUserEmail();
+      const avatarUrl = authManager.getUserAvatar();
+
+      userDisplayName.textContent = displayName;
+      userEmailDisplay.textContent = email;
+
+      // Set avatar or initials
+      if (avatarUrl) {
+        userAvatar.src = avatarUrl;
+        userAvatar.style.display = 'block';
+        userInitials.style.display = 'none';
+      } else {
+        userAvatar.style.display = 'none';
+        userInitials.style.display = 'flex';
+        // Get initials from display name
+        const initials = displayName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+        userInitials.textContent = initials;
       }
 
-      try {
-        // Update user info
-        const displayName = authMgr.getUserDisplayName();
-        const email = authMgr.getUserEmail();
-        const avatarUrl = authMgr.getUserAvatar();
+      // Toggle dropdown
+      let isMenuOpen = false;
+      userMenuTrigger.addEventListener('click', (e) => {
+        e.stopPropagation();
+        isMenuOpen = !isMenuOpen;
+        userMenuDropdown.classList.toggle('show', isMenuOpen);
+      });
 
-        if (userDisplayName) userDisplayName.textContent = displayName || 'User';
-        if (userEmailDisplay) userEmailDisplay.textContent = email || 'No email';
-
-        // Set avatar or initials
-        if (avatarUrl && userAvatar) {
-          userAvatar.src = avatarUrl;
-          userAvatar.style.display = 'block';
-          if (userInitials) userInitials.style.display = 'none';
-        } else {
-          if (userAvatar) userAvatar.style.display = 'none';
-          if (userInitials) {
-            userInitials.style.display = 'flex';
-            // Get initials from display name
-            const initials = (displayName || 'U').split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-            userInitials.textContent = initials;
-          }
+      // Close dropdown when clicking outside
+      document.addEventListener('click', () => {
+        if (isMenuOpen) {
+          isMenuOpen = false;
+          userMenuDropdown.classList.remove('show');
         }
+      });
 
-        // Toggle dropdown
-        if (userMenuTrigger && userMenuDropdown) {
-          let isMenuOpen = false;
-          userMenuTrigger.addEventListener('click', (e) => {
-            e.stopPropagation();
-            isMenuOpen = !isMenuOpen;
-            userMenuDropdown.classList.toggle('show', isMenuOpen);
-          });
-
-          // Close dropdown when clicking outside
-          document.addEventListener('click', () => {
-            if (isMenuOpen) {
-              isMenuOpen = false;
-              userMenuDropdown.classList.remove('show');
-            }
-          });
-
-          // Prevent dropdown from closing when clicking inside
-          userMenuDropdown.addEventListener('click', (e) => {
-            e.stopPropagation();
-          });
-        }
-        
-      } catch (error) {
-        console.error('Error setting up user menu:', error);
-        // Set fallback values
-        if (userDisplayName) userDisplayName.textContent = 'User';
-        if (userEmailDisplay) userEmailDisplay.textContent = 'Error loading';
-        if (userInitials) userInitials.textContent = '?';
-      }
+      // Prevent dropdown from closing when clicking inside
+      userMenuDropdown.addEventListener('click', (e) => {
+        e.stopPropagation();
+      });
     }
   </script>
 </body>

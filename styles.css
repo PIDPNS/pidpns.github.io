@@ -1886,13 +1886,15 @@ body.dark-mode .form-submit {
   box-sizing: border-box;
   background: none;
   z-index: 1;
+  overflow-y: auto; /* Enable vertical scrolling */
+  overflow-x: hidden; /* Hide horizontal scrollbar */
 }
 
 .official-content {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start; /* Changed from center to flex-start */
   padding: 2rem;
   width: 100%;
   max-width: 1200px;
@@ -1904,6 +1906,7 @@ body.dark-mode .form-submit {
   -webkit-backdrop-filter: none !important;
   border: none !important;
   box-shadow: none !important;
+  min-height: 100%; /* Ensure minimum height */
 }
 
 .official-logo {
@@ -2250,100 +2253,8 @@ body.dark-mode .official-content {
   z-index: 1001;
 }
 
-/* Inline Editing Styles */
-.editable-container {
-  position: relative;
-  display: inline-block;
-  width: 100%;
-}
-
-.inline-edit-btn {
-  position: absolute;
-  top: -8px;
-  right: -8px;
-  width: 28px;
-  height: 28px;
-  background: var(--primary);
-  color: white;
-  border: none;
-  border-radius: 50%;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  transition: all var(--transition);
-  z-index: 10;
-  box-shadow: 0 2px 8px rgba(52, 199, 89, 0.3);
-}
-
-.inline-edit-btn:hover {
-  background: var(--accent);
-  transform: scale(1.1);
-  box-shadow: 0 4px 12px rgba(52, 199, 89, 0.4);
-}
-
-.inline-edit-input {
-  background: rgba(255, 255, 255, 0.1) !important;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 2px solid var(--primary) !important;
-  border-radius: 6px !important;
-  padding: 0.5rem !important;
-  margin: 0.25rem 0 !important;
-  transition: all var(--transition);
-  resize: vertical;
-}
-
-.inline-edit-input:focus {
-  background: rgba(255, 255, 255, 0.15) !important;
-  border-color: var(--accent) !important;
-  box-shadow: 0 0 0 3px rgba(52, 199, 89, 0.2) !important;
-}
-
-.inline-edit-actions {
-  display: flex;
-  gap: 0.5rem;
-  justify-content: center;
-  margin-top: 0.5rem;
-}
-
-.inline-save-btn,
-.inline-cancel-btn {
-  width: 32px;
-  height: 32px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all var(--transition);
-}
-
-.inline-save-btn {
-  background: var(--primary);
-  color: white;
-}
-
-.inline-save-btn:hover {
-  background: var(--accent);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(52, 199, 89, 0.3);
-}
-
-.inline-cancel-btn {
-  background: rgba(255, 59, 48, 0.1);
-  color: #FF3B30;
-  border: 1px solid rgba(255, 59, 48, 0.2);
-}
-
-.inline-cancel-btn:hover {
-  background: rgba(255, 59, 48, 0.2);
-  transform: translateY(-1px);
-}
-
-.save-all-btn {
+/* Official Page Editor Styles - Inline Editing */
+.official-edit-toggle {
   position: absolute;
   top: 1rem;
   right: 1rem;
@@ -2354,99 +2265,295 @@ body.dark-mode .official-content {
   color: white;
   border: none;
   border-radius: 8px;
-  padding: 0.75rem 1rem;
+  padding: 0.5rem 1rem;
   cursor: pointer;
   font-family: var(--inter);
   font-size: 0.9rem;
   font-weight: 500;
   transition: all var(--transition);
   z-index: 10;
-  box-shadow: 0 4px 16px rgba(52, 199, 89, 0.3);
 }
 
-.save-all-btn:hover {
+.official-edit-toggle:hover {
   background: var(--accent);
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(52, 199, 89, 0.4);
+  box-shadow: 0 4px 12px rgba(52, 199, 89, 0.3);
 }
 
-/* Hover effects for editable sections */
-.editable-container:hover {
-  background: rgba(52, 199, 89, 0.05);
-  border-radius: 6px;
+.official-edit-toggle.save-mode {
+  background: #34C759;
+}
+
+.official-edit-toggle.save-mode:hover {
+  background: #30D158;
+}
+
+/* Inline Edit Wrapper */
+.inline-edit-wrapper {
+  position: relative;
+  display: inline-block;
+  border-radius: 4px;
   transition: all var(--transition);
 }
 
-/* Special handling for different text elements */
-.official-title .editable-container:hover,
-.official-event .editable-container:hover,
-.official-slogan .editable-container:hover {
-  background: rgba(52, 199, 89, 0.08);
+/* Only show edit buttons in edit mode */
+.official-backdrop-page:not(.edit-mode) .inline-edit-btn {
+  display: none;
 }
 
-/* Ensure proper positioning for meta items */
-.meta-item .editable-container {
-  display: inline;
+.official-backdrop-page.edit-mode .inline-edit-wrapper:hover {
+  background: rgba(52, 199, 89, 0.1);
+  outline: 2px solid rgba(52, 199, 89, 0.3);
 }
 
-.meta-item .inline-edit-btn {
-  top: -6px;
-  right: -6px;
+.inline-edit-btn {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 50%;
   width: 24px;
   height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transform: scale(0.8);
+  transition: all var(--transition);
+  z-index: 5;
 }
 
-/* Animation for edit state */
-.editing {
-  animation: editPulse 0.3s ease-out;
+.official-backdrop-page.edit-mode .inline-edit-wrapper:hover .inline-edit-btn {
+  opacity: 1;
+  transform: scale(1);
 }
 
-@keyframes editPulse {
-  0% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.02);
-  }
-  100% {
-    transform: scale(1);
-  }
+.inline-edit-btn:hover {
+  background: var(--accent);
+  transform: scale(1.1);
 }
 
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+/* Inline Edit Input */
+.inline-edit-input {
+  background: rgba(255, 255, 255, 0.95);
+  border: 2px solid var(--primary);
+  border-radius: 4px;
+  padding: 0.5rem;
+  width: 100%;
+  min-width: 200px;
+  outline: none;
+  box-shadow: 0 4px 12px rgba(52, 199, 89, 0.2);
 }
 
-/* Responsive adjustments for inline editing */
-@media (max-width: 768px) {
-  .inline-edit-btn {
-    width: 32px;
-    height: 32px;
-    top: -12px;
-    right: -12px;
-  }
+.inline-edit-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 4px 16px rgba(52, 199, 89, 0.3);
+}
 
-  .inline-edit-input {
-    font-size: 0.9rem !important;
-  }
+textarea.inline-edit-input {
+  resize: vertical;
+  min-height: 60px;
+}
 
-  .save-all-btn {
-    top: 0.5rem;
-    right: 0.5rem;
-    padding: 0.5rem 0.75rem;
-    font-size: 0.8rem;
-  }
+/* Inline Edit Actions */
+.inline-edit-actions {
+  position: absolute;
+  top: -8px;
+  right: -40px;
+  display: flex;
+  gap: 4px;
+  z-index: 10;
+}
+
+.inline-edit-save,
+.inline-edit-cancel {
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.inline-edit-save {
+  color: #34C759;
+  border-color: #34C759;
+}
+
+.inline-edit-save:hover {
+  background: #34C759;
+  color: white;
+}
+
+.inline-edit-cancel {
+  color: #FF3B30;
+  border-color: #FF3B30;
+}
+
+.inline-edit-cancel:hover {
+  background: #FF3B30;
+  color: white;
+}
+
+/* Editing state */
+.inline-edit-wrapper.editing {
+  background: rgba(255, 255, 255, 0.05) !important;
+  outline: 2px solid var(--primary) !important;
+  padding: 0.5rem;
+  border-radius: 8px;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
 }
 
 /* Dark mode adjustments */
 body.dark-mode .inline-edit-input {
-  background: rgba(28, 28, 30, 0.5) !important;
-  color: var(--text) !important;
+  background: rgba(28, 28, 30, 0.95);
+  color: var(--text);
+  border-color: var(--primary);
 }
 
-body.dark-mode .editable-container:hover {
-  background: rgba(48, 209, 88, 0.1);
+body.dark-mode .inline-edit-save,
+body.dark-mode .inline-edit-cancel {
+  background: var(--surface);
+  color: var(--text);
+}
+
+/* Remove old form styles that are no longer needed */
+.edit-form-container,
+.edit-form-title,
+.edit-form-grid,
+.form-group,
+.edit-form-actions,
+.btn-cancel,
+.btn-save {
+  display: none !important;
+}
+
+.edit-form-container {
+  width: 100%;
+  max-width: 800px;
+  background: var(--surface);
+  backdrop-filter: blur(var(--surface-blur));
+  -webkit-backdrop-filter: blur(var(--surface-blur));
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: var(--shadow);
+  margin: 2rem 0 8rem 0; /* Add bottom margin to clear footer */
+  position: relative;
+  z-index: 5;
+}
+
+.edit-form-title {
+  font-family: var(--orbitron);
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--primary);
+  margin: 0 0 2rem 0;
+  text-align: center;
+}
+
+.edit-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group.full-width {
+  grid-column: 1 / -1;
+}
+
+.form-group label {
+  font-family: var(--inter);
+  font-weight: 500;
+  color: var(--text);
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.form-group input,
+.form-group textarea {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  padding: 0.75rem;
+  font-family: var(--inter);
+  font-size: 0.9rem;
+  color: var(--text);
+  transition: all var(--transition);
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(52, 199, 89, 0.1);
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.edit-form-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.btn-cancel,
+.btn-save {
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-family: var(--inter);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition);
+  border: none;
+  font-size: 0.9rem;
+}
+
+.btn-cancel {
+  background: rgba(255, 59, 48, 0.1);
+  color: #FF3B30;
+  border: 1px solid rgba(255, 59, 48, 0.2);
+}
+
+.btn-cancel:hover {
+  background: rgba(255, 59, 48, 0.2);
+  transform: translateY(-1px);
+}
+
+.btn-save {
+  background: var(--primary);
+  color: white;
+}
+
+.btn-save:hover {
+  background: var(--accent);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(52, 199, 89, 0.3);
+}
+
+.btn-save:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
 }
 
 /* Notification Styles */
@@ -2512,22 +2619,37 @@ body.dark-mode .editable-container:hover {
 
 /* Responsive adjustments for inline editing */
 @media (max-width: 768px) {
-  .inline-edit-btn {
-    width: 32px;
-    height: 32px;
-    top: -12px;
-    right: -12px;
+  .official-edit-toggle {
+    top: 0.5rem;
+    right: 0.5rem;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
   }
 
   .inline-edit-input {
-    font-size: 0.9rem !important;
+    min-width: 150px;
+    font-size: 0.9rem;
   }
 
-  .save-all-btn {
-    top: 0.5rem;
-    right: 0.5rem;
-    padding: 0.5rem 0.75rem;
-    font-size: 0.8rem;
+  .inline-edit-actions {
+    right: -36px;
+  }
+
+  .inline-edit-btn {
+    width: 20px;
+    height: 20px;
+  }
+
+  .inline-edit-save,
+  .inline-edit-cancel {
+    width: 20px;
+    height: 20px;
+  }
+
+  .notification {
+    top: 1rem;
+    right: 1rem;
+    left: 1rem;
   }
 }
 
@@ -2586,76 +2708,4 @@ body.dark-mode .notification {
     opacity: 1;
     transform: translateY(0);
   }
-}
-
-/* Image editing specific styles */
-.image-edit-container {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  padding: 0.5rem;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 2px solid var(--primary);
-  border-radius: 8px;
-  width: 200px;
-  max-width: 100%;
-}
-
-.upload-btn {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: var(--primary);
-  color: white;
-  border: none;
-  border-radius: 6px;
-  padding: 0.5rem;
-  cursor: pointer;
-  font-family: var(--inter);
-  font-size: 0.8rem;
-  font-weight: 500;
-  transition: all var(--transition);
-}
-
-.upload-btn:hover {
-  background: var(--accent);
-  transform: translateY(-1px);
-}
-
-.image-preview {
-  display: block;
-  margin: 0 auto;
-}
-
-/* Special positioning for logo edit button */
-.official-logo .editable-container {
-  position: relative;
-  display: inline-block;
-}
-
-.official-logo .inline-edit-btn {
-  top: 5px;
-  right: 5px;
-  background: rgba(52, 199, 89, 0.9);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-}
-
-.official-logo .editable-container:hover {
-  background: rgba(52, 199, 89, 0.1);
-  border-radius: 8px;
-  padding: 8px;
-}
-
-/* Ensure logo container doesn't interfere with layout */
-.official-logo .editable-container .image-edit-container {
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 20;
-  margin-top: 0.5rem;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
 }

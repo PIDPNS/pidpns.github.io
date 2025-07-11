@@ -6,41 +6,32 @@ class AuthManager {
     this.supabase = supabaseClient;
     this.currentUser = null;
     this.isInitialized = false;
-    this.authListenerSetup = false;
   }
 
   // Initialize authentication
   async init() {
     try {
-      // Prevent multiple initializations
-      if (this.isInitialized) {
-        return this.currentUser !== null;
-      }
-
-      // Get current session without triggering auth state changes
+      // Get current session
       const { data: { session }, error } = await this.supabase.auth.getSession();
       
       if (error) {
         console.error('Auth initialization error:', error);
+        this.redirectToLogin();
         return false;
       }
 
       if (session && session.user) {
         this.currentUser = session.user;
         this.isInitialized = true;
-        
-        // Only set up auth listener once
-        if (!this.authListenerSetup) {
-          this.setupAuthListener();
-        }
-        
         return true;
       } else {
-        // No valid session
+        // No valid session, redirect to login
+        this.redirectToLogin();
         return false;
       }
     } catch (error) {
       console.error('Auth initialization failed:', error);
+      this.redirectToLogin();
       return false;
     }
   }
@@ -114,24 +105,16 @@ class AuthManager {
     window.location.href = 'login.html';
   }
 
-  // Set up auth state change listener (only once)
+  // Set up auth state change listener
   setupAuthListener() {
-    if (this.authListenerSetup) {
-      return; // Prevent multiple listeners
-    }
-    
-    this.authListenerSetup = true;
-    
     this.supabase.auth.onAuthStateChange((event, session) => {
-      console.log('Auth state changed:', event);
+      console.log('Auth state changed:', event, session);
       
       switch (event) {
         case 'SIGNED_IN':
-          if (!this.currentUser || this.currentUser.id !== session?.user?.id) {
-            this.currentUser = session?.user || null;
-            this.isInitialized = true;
-            console.log('User authenticated:', this.currentUser?.email);
-          }
+          this.currentUser = session?.user || null;
+          this.isInitialized = true;
+          this.updateUI();
           break;
           
         case 'SIGNED_OUT':
@@ -141,13 +124,7 @@ class AuthManager {
           break;
           
         case 'TOKEN_REFRESHED':
-          if (session?.user) {
-            this.currentUser = session.user;
-          }
-          break;
-          
-        case 'INITIAL_SESSION':
-          // Handle initial session silently, already processed in init()
+          this.currentUser = session?.user || null;
           break;
           
         default:
@@ -218,6 +195,32 @@ class AuthManager {
   }
 }
 
+// Initialize auth manager when script loads
+let authManager = null;
+
+// Function to initialize authentication
+async function initializeAuth(supabaseClient) {
+  authManager = new AuthManager(supabaseClient);
+  
+  // Set up auth state listener
+  authManager.setupAuthListener();
+  
+  // Initialize and check authentication
+  const isAuthenticated = await authManager.init();
+  
+  if (isAuthenticated) {
+    // Update UI with user info
+    authManager.updateUI();
+    
+    // Add sign out functionality
+    setupSignOutButtons();
+    
+    console.log('User authenticated:', authManager.getUserDisplayName());
+  }
+  
+  return isAuthenticated;
+}
+
 // Set up sign out buttons
 function setupSignOutButtons() {
   const signOutButtons = document.querySelectorAll('.sign-out-btn, [data-action="sign-out"]');
@@ -230,9 +233,7 @@ function setupSignOutButtons() {
         button.disabled = true;
         button.textContent = 'Signing out...';
         
-        if (globalAuthManager) {
-          await globalAuthManager.signOut();
-        }
+        await authManager.signOut();
         
       } catch (error) {
         console.error('Sign out failed:', error);
@@ -246,14 +247,14 @@ function setupSignOutButtons() {
 
 // Create user menu for authenticated users
 function createUserMenu() {
-  if (!globalAuthManager || !globalAuthManager.isAuthenticated()) return;
+  if (!authManager || !authManager.isAuthenticated()) return;
   
   const userMenuHtml = `
     <div class="user-menu">
       <div class="user-info">
         <img class="user-avatar" src="" alt="User Avatar" style="display: none; width: 32px; height: 32px; border-radius: 50%;">
         <div class="user-details">
-          <div class="user-display-name">${globalAuthManager.getUserDisplayName()}</div>
+          <div class="user-display-name">${authManager.getUserDisplayName()}</div>
           <div class="user-email">${authManager.getUserEmail()}</div>
         </div>
       </div>
@@ -313,35 +314,6 @@ function protectPage() {
 }
 
 // Export for use in other scripts
-// Global auth manager instance (singleton)
-let globalAuthManager = null;
-
-// Initialize authentication with singleton pattern
-async function initializeAuth(supabaseClient) {
-  try {
-    // Use existing global auth manager or create new one
-    if (!globalAuthManager) {
-      globalAuthManager = new AuthManager(supabaseClient);
-      // Make it globally available immediately
-      window.authManager = globalAuthManager;
-      window.globalAuthManager = globalAuthManager;
-    }
-    
-    const isAuthenticated = await globalAuthManager.init();
-    
-    if (isAuthenticated) {
-      console.log('User authenticated:', globalAuthManager.getCurrentUser()?.email);
-      // Ensure global access is still available after init
-      window.authManager = globalAuthManager;
-    }
-    
-    return isAuthenticated;
-  } catch (error) {
-    console.error('Authentication initialization failed:', error);
-    return false;
-  }
-}
-
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = { AuthManager, initializeAuth, protectPage, createUserMenu };
 }
