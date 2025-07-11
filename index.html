@@ -348,6 +348,7 @@
   </div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="auth.js"></script>
+  <script src="official-editor.js"></script>
   <script src="script.js"></script>
   <script>
     // Initialize authentication before anything else
@@ -369,6 +370,11 @@
           
           // Initialize user menu
           setupUserMenu();
+          
+          // Initialize official page editor
+          if (typeof initializeOfficialEditor === 'function') {
+            initializeOfficialEditor(supabase);
+          }
           
           console.log('Digital Backdrop initialized with authentication');
         } else {
