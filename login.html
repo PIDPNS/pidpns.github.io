@@ -403,6 +403,9 @@
 
     <div class="footer-link">
       Need access? <a href="mailto:admin@pidpns.gov.my">Contact Administrator</a>
+      <div style="margin-top: 0.5rem; font-size: 0.75rem; color: var(--text-tertiary);">
+        Access is granted by invitation only
+      </div>
     </div>
   </div>
 
@@ -468,7 +471,15 @@
         });
 
         if (error) {
-          throw error;
+          // Handle specific error types
+          if (error.message.includes('Invalid login credentials') || 
+              error.message.includes('Email not confirmed') ||
+              error.message.includes('User not found')) {
+            showMessage('Access denied. Please contact your administrator for login credentials.');
+          } else {
+            showMessage(error.message || 'Login failed. Please try again.');
+          }
+          return;
         }
 
         // Store remember me preference
@@ -485,7 +496,7 @@
 
       } catch (error) {
         console.error('Login error:', error);
-        showMessage(error.message || 'Login failed. Please try again.');
+        showMessage('Login failed. Please contact your administrator.');
       } finally {
         setLoading(false);
       }

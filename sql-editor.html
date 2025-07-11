@@ -416,6 +416,43 @@ GROUP BY DATE(created_at)
 ORDER BY date DESC;">
             📅 Daily Activity
           </button>
+        </div>
+        
+        <h3 style="margin-top: 2rem;">User Management</h3>
+        <div class="query-templates">
+          <button class="template-btn" data-query="SELECT 
+  id,
+  email,
+  created_at,
+  last_sign_in_at,
+  email_confirmed_at
+FROM auth.users 
+ORDER BY created_at DESC;">
+            👥 List All Users
+          </button>
+          <button class="template-btn" data-query="SELECT 
+  email,
+  last_sign_in_at,
+  CASE 
+    WHEN last_sign_in_at > NOW() - INTERVAL '7 days' THEN 'Active'
+    WHEN last_sign_in_at > NOW() - INTERVAL '30 days' THEN 'Recent'
+    ELSE 'Inactive'
+  END as status
+FROM auth.users 
+ORDER BY last_sign_in_at DESC NULLS LAST;">
+            📊 User Activity Status
+          </button>
+          <button class="template-btn" data-query="SELECT 
+  COUNT(*) as total_users,
+  COUNT(CASE WHEN last_sign_in_at > NOW() - INTERVAL '30 days' THEN 1 END) as active_users,
+  COUNT(CASE WHEN email_confirmed_at IS NOT NULL THEN 1 END) as confirmed_users
+FROM auth.users;">
+            📈 User Statistics
+          </button>
+        </div>
+        
+        <h3 style="margin-top: 2rem;">System Queries</h3>
+        <div class="query-templates">
           <button class="template-btn" data-query="SHOW TABLES;">
             🗂️ Show All Tables
           </button>
@@ -427,7 +464,7 @@ ORDER BY date DESC;">
   tablename,
   tableowner
 FROM pg_tables 
-WHERE schemaname = 'public';">
+WHERE schemaname IN ('public', 'auth');">
             🏗️ Database Structure
           </button>
         </div>
