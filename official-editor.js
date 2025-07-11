@@ -47,8 +47,7 @@ class OfficialPageEditor {
       officiated_text: "Dirasmikan oleh,",
       vip_name: "YB. Datuk Dr. Haji Mohd Arifin Bin Datuk Haji Mohd. Arif, JP",
       vip_position: "Menteri Sains, Teknologi dan Inovasi Sabah",
-      event_date: "24 Jun 2023 (Sabtu)",
-      event_time: "08:00 Pagi",
+      event_datetime: "24 Jun 2023 (Sabtu) | 🕗 08:00 Pagi",
       event_location: "Taman Ujana Rimba Tropika & Dewan Mataking,\nIbu Pejabat Perpustakaan Negeri Sabah",
       slogan: "SABAH MAJU JAYA",
       logo_url: "assets/2.png",
@@ -78,8 +77,7 @@ class OfficialPageEditor {
       officiated_text: document.querySelector('.official-officiated p:first-child')?.textContent || '',
       vip_name: document.querySelector('.official-vip')?.textContent || '',
       vip_position: document.querySelector('.official-position')?.textContent || '',
-      event_date: document.querySelector('.meta-item:first-child .meta-text:first-of-type')?.textContent || '',
-      event_time: document.querySelector('.meta-item:first-child .meta-text:last-of-type')?.textContent || '',
+      event_datetime: document.querySelector('.datetime-combined')?.textContent || '',
       event_location: document.querySelector('.meta-item:last-child .meta-text')?.textContent || '',
       slogan: document.querySelector('.official-slogan')?.textContent || '',
       logo_url: document.querySelector('.event-logo')?.src || document.querySelector('.event-logo')?.getAttribute('src') || ''
@@ -94,8 +92,7 @@ class OfficialPageEditor {
     const officiatedEl = document.querySelector('.official-officiated p:first-child');
     const vipEl = document.querySelector('.official-vip');
     const positionEl = document.querySelector('.official-position');
-    const dateEl = document.querySelector('.meta-item:first-child .meta-text:first-of-type');
-    const timeEl = document.querySelector('.meta-item:first-child .meta-text:last-of-type');
+    const datetimeEl = document.querySelector('.datetime-combined');
     const locationEl = document.querySelector('.meta-item:last-child .meta-text');
     const sloganEl = document.querySelector('.official-slogan');
     const logoEl = document.querySelector('.event-logo');
@@ -107,8 +104,17 @@ class OfficialPageEditor {
     if (officiatedEl) officiatedEl.textContent = data.officiated_text;
     if (vipEl) vipEl.textContent = data.vip_name;
     if (positionEl) positionEl.textContent = data.vip_position;
-    if (dateEl) dateEl.textContent = data.event_date;
-    if (timeEl) timeEl.textContent = data.event_time;
+    
+    // Handle both new combined datetime format and legacy separate date/time
+    if (datetimeEl) {
+      if (data.event_datetime) {
+        datetimeEl.textContent = data.event_datetime;
+      } else if (data.event_date && data.event_time) {
+        // Convert legacy format to new combined format
+        datetimeEl.textContent = `${data.event_date} | 🕗 ${data.event_time}`;
+      }
+    }
+    
     if (locationEl) locationEl.innerHTML = data.event_location.replace(/\n/g, '<br>');
     if (sloganEl) sloganEl.textContent = data.slogan;
     if (logoEl && data.logo_url) logoEl.src = data.logo_url;
@@ -181,8 +187,7 @@ class OfficialPageEditor {
       { selector: '.official-officiated p:first-child', field: 'officiated_text', type: 'text' },
       { selector: '.official-vip', field: 'vip_name', type: 'text' },
       { selector: '.official-position', field: 'vip_position', type: 'text' },
-      { selector: '.meta-item:first-child .meta-text:first-of-type', field: 'event_date', type: 'text' },
-      { selector: '.meta-item:first-child .meta-text:last-of-type', field: 'event_time', type: 'text' },
+      { selector: '.datetime-combined', field: 'event_datetime', type: 'text' },
       { selector: '.meta-item:last-child .meta-text', field: 'event_location', type: 'textarea' },
       { selector: '.official-slogan', field: 'slogan', type: 'text' },
       { selector: '.event-logo', field: 'logo_url', type: 'image' }
