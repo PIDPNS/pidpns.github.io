@@ -528,16 +528,19 @@ SELECT * FROM messages ORDER BY created_at DESC LIMIT 10;"
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-client.js"></script>
   <script src="auth.js"></script>
   <script>
     // Authentication check for SQL Editor
     document.addEventListener('DOMContentLoaded', async function() {
-      // Initialize Supabase client
-      const SUPABASE_URL = 'https://amxvmnzhwehxmnwzzaoy.supabase.co';
-      const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFteHZtbnpod2VoeG1ud3p6YW95Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE5NTc5NDksImV4cCI6MjA2NzUzMzk0OX0.Vedmvf0QnCEh5TdgarY48BW2vrBgmYayQ2c-fcKFHlo';
-      const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-      
       try {
+        // Get the single Supabase client instance
+        const supabase = getSupabaseClient();
+        
+        if (!supabase) {
+          throw new Error('Failed to initialize Supabase client');
+        }
+        
         // Initialize authentication
         const isAuthenticated = await initializeAuth(supabase);
         
@@ -561,20 +564,14 @@ SELECT * FROM messages ORDER BY created_at DESC LIMIT 10;"
     
     // SQL Editor functionality
     function initializeSQLEditor(supabaseClient) {
-      // Set the global supabase variable for the existing script
-      window.supabase = window.supabase || {};
-      window.supabase.createClient = () => supabaseClient;
-    
-    // Supabase configuration (same as your main app)
-    const SUPABASE_URL = 'https://amxvmnzhwehxmnwzzaoy.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFteHZtbnpod2VoeG1ud3p6YW95Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE5NTc5NDksImV4cCI6MjA2NzUzMzk0OX0.Vedmvf0QnCEh5TdgarY48BW2vrBgmYayQ2c-fcKFHlo';
-    const supabase = supabaseClient;
+      // Use the passed supabase client
+      const supabase = supabaseClient;
 
-    // DOM elements
-    const sqlQuery = document.getElementById('sqlQuery');
-    const executeBtn = document.getElementById('executeBtn');
-    const clearBtn = document.getElementById('clearBtn');
-    const resultsContainer = document.getElementById('resultsContainer');
+      // DOM elements
+      const sqlQuery = document.getElementById('sqlQuery');
+      const executeBtn = document.getElementById('executeBtn');
+      const clearBtn = document.getElementById('clearBtn');
+      const resultsContainer = document.getElementById('resultsContainer');
     const resultsContent = document.getElementById('resultsContent');
     const resultsInfo = document.getElementById('resultsInfo');
     const loadingIndicator = document.getElementById('loadingIndicator');
