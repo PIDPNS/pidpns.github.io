@@ -316,32 +316,68 @@
     </footer>
     <!-- Move official-backdrop-page here, as a sibling to header, main-content, and footer -->
     <div class="official-backdrop-page" data-screen="official" style="display:none;">
+      <!-- Save Indicator (minimal and discrete) -->
+      <div class="save-indicator" id="saveIndicator">
+        <div class="save-spinner"></div>
+        <span>Saving...</span>
+      </div>
+      
       <div class="official-content">
-        <div class="official-logo">
-          <img src="assets/2.png" alt="Event Logo" class="event-logo">
+        <!-- Minister Photo Section (Left Side) -->
+        <div class="minister-photo-section" data-field="minister_photo_url">
+          <div class="minister-photo-container" id="ministerPhotoContainer">
+            <img src="" alt="Minister Photo" class="minister-photo" id="ministerPhoto" style="display: none;">
+            <div class="minister-upload-overlay">
+              <div class="minister-upload-content">
+                <svg class="upload-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="7,10 12,15 17,10"/>
+                  <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                <span class="upload-text">Add Minister Photo</span>
+              </div>
+              <input type="file" class="minister-file-input" accept="image/*" id="ministerFileInput">
+            </div>
+          </div>
         </div>
-        <div class="official-details">
-          <h1 class="official-title">MAJLIS PERASMIAN</h1>
-          <h2 class="official-event">MINGGU PERPUSTAKAAN DAN STORYWALK® <span class="official-event-sub">(Walk With The Library)</span></h2>
-          <div class="official-officiated">
-            <p>Dirasmikan oleh,</p>
-            <p class="official-vip">YB. Datuk Dr. Haji Mohd Arifin Bin Datuk Haji Mohd. Arif, JP</p>
-            <p class="official-position">Menteri Sains, Teknologi dan Inovasi Sabah</p>
-          </div>
-          <div class="official-meta">
-            <div class="meta-item">
-              <span class="meta-icon">🗓️</span>
-              <span class="meta-text">24 Jun 2023 (Sabtu)</span>
-              <span class="meta-separator">|</span>
-              <span class="meta-icon">🕗</span>
-              <span class="meta-text">08:00 Pagi</span>
-            </div>
-            <div class="meta-item">
-              <span class="meta-icon">📍</span>
-              <span class="meta-text">Taman Ujana Rimba Tropika & Dewan Mataking,<br>Ibu Pejabat Perpustakaan Negeri Sabah</span>
+        
+        <!-- Main Content Section (Right Side) -->
+        <div class="main-content-section">
+          <div class="official-logo">
+            <div class="editable-logo-container" data-field="logo_url">
+              <img src="assets/2.png" alt="Event Logo" class="event-logo" id="officialLogo">
+              <div class="logo-upload-overlay">
+                <div class="logo-upload-text">Click to change logo</div>
+                <input type="file" class="logo-file-input" accept="image/*" id="logoFileInput">
+              </div>
             </div>
           </div>
-          <div class="official-slogan">"SABAH MAJU JAYA"</div>
+          <div class="official-details">
+            <h1 class="official-title editable-field" data-field="title" id="officialTitle">MAJLIS PERASMIAN</h1>
+            <h2 class="official-event">
+              <span class="editable-field" data-field="event_name" id="officialEventName">MINGGU PERPUSTAKAAN DAN STORYWALK®</span> 
+              <span class="official-event-sub editable-field" data-field="event_subtitle" id="officialEventSubtitle">(Walk With The Library)</span>
+            </h2>
+            <div class="official-officiated">
+              <p class="editable-field" data-field="officiated_text" id="officialOfficiatedText">Dirasmikan oleh,</p>
+              <p class="official-vip editable-field" data-field="vip_name" id="officialVipName">YB. Datuk Dr. Haji Mohd Arifin Bin Datuk Haji Mohd. Arif, JP</p>
+              <p class="official-position editable-field" data-field="vip_position" id="officialVipPosition">Menteri Sains, Teknologi dan Inovasi Sabah</p>
+            </div>
+            <div class="official-meta">
+              <div class="meta-item">
+                <span class="meta-icon">🗓️</span>
+                <span class="meta-text editable-field" data-field="event_date" id="officialEventDate">24 Jun 2023 (Sabtu)</span>
+                <span class="meta-separator">|</span>
+                <span class="meta-icon">🕗</span>
+                <span class="meta-text editable-field" data-field="event_time" id="officialEventTime">08:00 Pagi</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-icon">📍</span>
+                <span class="meta-text editable-field" data-field="event_location" id="officialEventLocation">Taman Ujana Rimba Tropika & Dewan Mataking,<br>Ibu Pejabat Perpustakaan Negeri Sabah</span>
+              </div>
+            </div>
+            <div class="official-slogan editable-field" data-field="slogan" id="officialSlogan">"SABAH MAJU JAYA"</div>
+          </div>
         </div>
       </div>
     </div>
@@ -371,9 +407,9 @@
           // Initialize user menu
           setupUserMenu();
           
-          // Initialize official page editor
-          if (typeof initializeOfficialEditor === 'function') {
-            initializeOfficialEditor(supabase);
+          // Initialize official backdrop editor
+          if (typeof initializeOfficialBackdropEditor === 'function') {
+            initializeOfficialBackdropEditor(supabase);
           }
           
           console.log('Digital Backdrop initialized with authentication');

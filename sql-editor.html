@@ -467,11 +467,25 @@ FROM pg_tables
 WHERE schemaname IN ('public', 'auth');">
             🏗️ Database Structure
           </button>
-          <button class="template-btn" data-query="SELECT * FROM official_page_content ORDER BY created_at DESC;">
-            📄 Official Page Content
+        </div>
+        
+        <h3 style="margin-top: 2rem;">Official Backdrop</h3>
+        <div class="query-templates">
+          <button class="template-btn" data-query="SELECT * FROM official_backdrop_content ORDER BY created_at DESC;">
+            📜 View Official Backdrop Content
           </button>
-          <button class="template-btn" data-query="DESCRIBE official_page_content;">
-            📋 Official Page Content Schema
+          <button class="template-btn" data-query="SELECT 
+  COUNT(*) as total_events,
+  COUNT(CASE WHEN is_active THEN 1 END) as active_events,
+  COUNT(CASE WHEN updated_at > NOW() - INTERVAL '30 days' THEN 1 END) as recent_updates
+FROM official_backdrop_content;">
+            📊 Official Backdrop Statistics
+          </button>
+          <button class="template-btn" data-query="SELECT * FROM official_backdrop_content WHERE is_active = true;">
+            ✅ Active Official Backdrop Content
+          </button>
+          <button class="template-btn" data-query="SELECT * FROM official_backdrop_content WHERE is_active = false ORDER BY updated_at DESC;">
+            ❌ Inactive Official Backdrop Content
           </button>
         </div>
       </aside>
@@ -567,7 +581,7 @@ SELECT * FROM messages ORDER BY created_at DESC LIMIT 10;"
     
     // Supabase configuration (same as your main app)
     const SUPABASE_URL = 'https://amxvmnzhwehxmnwzzaoy.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFteHZtbnpod2VoeG1ud3p6YW95Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE5NTc5NDksImV4cCI6MjA2NzUzMzk0OX0.Vedmvf0QnCEh5TdgarY48BW2vrBgmYayQ2c-fcKFHlo';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFteHZtbnpod2VoeG1ud3p6YW95Iiwicm9zZSI6ImFub24iLCJpYXQiOjE3NTE5NTc5NDksImV4cCI6MjA2NzUzMzk0OX0.Vedmvf0QnCEh5TdgarY48BW2vrBgmYayQ2c-fcKFHlo';
     const supabase = supabaseClient;
 
     // DOM elements
@@ -623,9 +637,9 @@ SELECT * FROM messages ORDER BY created_at DESC LIMIT 10;"
           } else if (lowerQuery.includes('describe') || lowerQuery.includes('\\d')) {
             // Describe table query
             result = await describeTable(query);
-          } else if (lowerQuery.includes('official_page_content')) {
-            // Special handling for official_page_content queries
-            result = await executeOfficialPageContentQuery(query);
+          } else if (lowerQuery.includes('official_backdrop_content')) {
+            // Official backdrop content query
+            result = await executeBackdropSelectQuery(query);
           } else {
             // Try to execute as raw query
             result = await executeRawQuery(query);
@@ -730,53 +744,17 @@ SELECT * FROM messages ORDER BY created_at DESC LIMIT 10;"
           { column_name: 'content', data_type: 'text', is_nullable: 'YES', column_default: null },
           { column_name: 'image_url', data_type: 'text', is_nullable: 'YES', column_default: null }
         ];
-      } else if (tableName.toLowerCase() === 'official_page_content') {
-        // Return structure of official_page_content table
-        return [
-          { column_name: 'id', data_type: 'bigint', is_nullable: 'NO', column_default: 'nextval()' },
-          { column_name: 'title', data_type: 'text', is_nullable: 'NO', column_default: "'MAJLIS PERASMIAN'" },
-          { column_name: 'event_name', data_type: 'text', is_nullable: 'NO', column_default: "'EVENT NAME'" },
-          { column_name: 'event_subtitle', data_type: 'text', is_nullable: 'YES', column_default: '' },
-          { column_name: 'officiated_text', data_type: 'text', is_nullable: 'NO', column_default: "'Dirasmikan oleh,'" },
-          { column_name: 'vip_name', data_type: 'text', is_nullable: 'NO', column_default: "'VIP NAME'" },
-          { column_name: 'vip_position', data_type: 'text', is_nullable: 'NO', column_default: "'VIP POSITION'" },
-          { column_name: 'event_date', data_type: 'text', is_nullable: 'NO', column_default: "'DD MMM YYYY'" },
-          { column_name: 'event_time', data_type: 'text', is_nullable: 'NO', column_default: "'HH:MM AM/PM'" },
-          { column_name: 'event_location', data_type: 'text', is_nullable: 'NO', column_default: "'EVENT LOCATION'" },
-          { column_name: 'slogan', data_type: 'text', is_nullable: 'NO', column_default: "'SLOGAN'" },
-          { column_name: 'logo_url', data_type: 'text', is_nullable: 'YES', column_default: "'assets/2.png'" },
-          { column_name: 'is_active', data_type: 'boolean', is_nullable: 'YES', column_default: 'true' },
-          { column_name: 'created_at', data_type: 'timestamp with time zone', is_nullable: 'NO', column_default: "timezone('utc'::text, now())" },
-          { column_name: 'updated_at', data_type: 'timestamp with time zone', is_nullable: 'NO', column_default: "timezone('utc'::text, now())" }
-        ];
       }
       
       throw new Error(`Table '${tableName}' structure not available`);
     }
 
-    async function executeOfficialPageContentQuery(query) {
-      // Special handling for official_page_content queries
+    async function executeBackdropSelectQuery(query) {
+      // Execute SELECT queries for official backdrop content
       const { data, error } = await supabase.rpc('execute_sql', { query_text: query });
       
       if (error) {
-        // Fallback to basic select if RPC fails
-        const limit = query.match(/limit\s+(\d+)/i);
-        const limitNum = limit ? parseInt(limit[1]) : 100;
-        
-        let queryBuilder = supabase.from('official_page_content').select('*');
-        
-        if (query.toLowerCase().includes('is_active = false')) {
-          queryBuilder = queryBuilder.eq('is_active', false);
-        } else {
-          queryBuilder = queryBuilder.eq('is_active', true);
-        }
-        
-        const { data: selectData, error: selectError } = await queryBuilder
-          .order('created_at', { ascending: false })
-          .limit(limitNum);
-          
-        if (selectError) throw selectError;
-        return selectData;
+        throw new Error('Failed to execute backdrop content query');
       }
       
       return data;
@@ -890,3 +868,33 @@ SELECT * FROM messages ORDER BY created_at DESC LIMIT 10;"
   </script>
 </body>
 </html>
+
+-- Create storage bucket for logos (run this in Supabase SQL Editor)
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('logos', 'logos', true)
+ON CONFLICT (id) DO NOTHING;
+
+-- Create policy for authenticated users to upload logos
+CREATE POLICY "Allow authenticated users to upload logos" ON storage.objects
+  FOR INSERT WITH CHECK (
+    bucket_id = 'logos' AND 
+    auth.role() = 'authenticated'
+  );
+
+-- Create policy for public read access to logos
+CREATE POLICY "Allow public read access to logos" ON storage.objects
+  FOR SELECT USING (bucket_id = 'logos');
+
+-- Create policy for authenticated users to update logos
+CREATE POLICY "Allow authenticated users to update logos" ON storage.objects
+  FOR UPDATE USING (
+    bucket_id = 'logos' AND 
+    auth.role() = 'authenticated'
+  );
+
+-- Create policy for authenticated users to delete old logos
+CREATE POLICY "Allow authenticated users to delete logos" ON storage.objects
+  FOR DELETE USING (
+    bucket_id = 'logos' AND 
+    auth.role() = 'authenticated'
+  );
