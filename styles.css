@@ -494,6 +494,14 @@ body.dark-mode .glass-card {
   position: relative;
   margin-top: auto;
   background: transparent;
+  transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.5s ease;
+  transform: translateY(0);
+  opacity: 1;
+}
+.footer.presentation-mode {
+  transform: translateY(100%);
+  opacity: 0;
+  pointer-events: none;
 }
 .footer-content {
   font-size: 1rem;
@@ -2356,13 +2364,21 @@ body.dark-mode .editable-field.editing {
 
 .official-slogan {
   position: relative;
-  font-family: var(--orbitron);
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: var(--primary);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Arial Black', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 900;
+  color: #1D1D1F;
   text-align: center;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.1);
   z-index: 2;
+}
+
+/* Dark mode slogan styling */
+body.dark-mode .official-slogan {
+  color: #FFFFFF;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
 
 /* Logo animations and responsive behavior */
@@ -2727,4 +2743,49 @@ body.dark-mode .official-content {
   color: var(--muted);
   text-align: center;
   margin-top: 0.25rem;
+}
+
+/* Presentation Mode - Navigation Hide/Show */
+.footer {
+  transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.5s ease;
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.footer.presentation-mode {
+  transform: translateY(100%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Double-click indicator for presentation mode */
+.presentation-hint {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  z-index: 10000;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  font-family: var(--inter);
+}
+
+.presentation-hint.show {
+  opacity: 1;
+}
+
+/* Ensure content expands when navigation is hidden */
+.official-backdrop-page.nav-hidden .main-content {
+  height: calc(100vh - 60px); /* Only account for header when nav is hidden */
+}
+
+.official-backdrop-page.nav-hidden {
+  height: 100vh;
 }

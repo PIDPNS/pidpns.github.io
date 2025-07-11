@@ -194,6 +194,9 @@ class OfficialBackdropEditor {
 
     // Setup editable fields
     this.setupEditableFields();
+
+    // Setup presentation mode (double-click navigation hide/show)
+    this.setupPresentationMode();
   }
 
   setupEditableFields() {
@@ -698,6 +701,67 @@ class OfficialBackdropEditor {
     this.saveTimeout = setTimeout(() => {
       indicator.classList.remove('show');
     }, hideDelay);
+  }
+
+  // Presentation Mode - Double-click to hide/show navigation
+  setupPresentationMode() {
+    const officialBackdropPage = document.querySelector('.official-backdrop-page');
+    const footer = document.querySelector('.footer');
+    const presentationHint = document.getElementById('presentationHint');
+    let isHidden = false;
+    let hintTimeout = null;
+
+    if (!officialBackdropPage || !footer || !presentationHint) return;
+
+    // Double-click event listener for presentation mode
+    officialBackdropPage.addEventListener('dblclick', (e) => {
+      // Prevent double-click on editable elements from triggering presentation mode
+      if (e.target.classList.contains('editable-field') || 
+          e.target.closest('.editable-field') ||
+          e.target.closest('.minister-photo-container') ||
+          e.target.closest('.logo-container')) {
+        return;
+      }
+
+      isHidden = !isHidden;
+      
+      if (isHidden) {
+        footer.classList.add('presentation-mode');
+        officialBackdropPage.classList.add('nav-hidden');
+        this.showPresentationHint('Navigation hidden - Double-click to show');
+      } else {
+        footer.classList.remove('presentation-mode');
+        officialBackdropPage.classList.remove('nav-hidden');
+        this.showPresentationHint('Navigation visible - Double-click to hide');
+      }
+    });
+
+    // Show hint on first hover for guidance
+    let hintShown = false;
+    officialBackdropPage.addEventListener('mouseenter', () => {
+      if (!hintShown && !isHidden) {
+        this.showPresentationHint('Double-click anywhere to enter presentation mode', 3000);
+        hintShown = true;
+      }
+    });
+  }
+
+  showPresentationHint(message, duration = 2000) {
+    const presentationHint = document.getElementById('presentationHint');
+    if (!presentationHint) return;
+
+    presentationHint.textContent = message;
+    presentationHint.classList.add('show');
+
+    // Clear any existing timeout
+    if (this.hintTimeout) {
+      clearTimeout(this.hintTimeout);
+    }
+
+    // Hide hint after duration
+    this.hintTimeout = setTimeout(() => {
+      presentationHint.classList.remove('show');
+    }, duration);
   }
 
   // Public method to get current content
