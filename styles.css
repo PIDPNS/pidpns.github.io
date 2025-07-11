@@ -1886,13 +1886,15 @@ body.dark-mode .form-submit {
   box-sizing: border-box;
   background: none;
   z-index: 1;
+  overflow-y: auto; /* Enable vertical scrolling */
+  overflow-x: hidden; /* Hide horizontal scrollbar */
 }
 
 .official-content {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start; /* Changed from center to flex-start */
   padding: 2rem;
   width: 100%;
   max-width: 1200px;
@@ -1904,6 +1906,7 @@ body.dark-mode .form-submit {
   -webkit-backdrop-filter: none !important;
   border: none !important;
   box-shadow: none !important;
+  min-height: 100%; /* Ensure minimum height */
 }
 
 .official-logo {
@@ -2287,6 +2290,9 @@ body.dark-mode .official-content {
   border-radius: 16px;
   padding: 2rem;
   box-shadow: var(--shadow);
+  margin: 2rem 0 8rem 0; /* Add bottom margin to clear footer */
+  position: relative;
+  z-index: 5;
 }
 
 .edit-form-title {
@@ -2455,9 +2461,14 @@ body.dark-mode .official-content {
 
 /* Responsive adjustments for edit form */
 @media (max-width: 768px) {
+  .official-backdrop-page {
+    padding: 1rem 0.5rem 0 0.5rem; /* Remove top padding, keep bottom for scrolling */
+    justify-content: flex-start; /* Start from top on mobile */
+  }
+
   .edit-form-container {
     padding: 1.5rem;
-    margin: 0 1rem;
+    margin: 1rem 1rem 10rem 1rem; /* More bottom margin on mobile */
   }
 
   .edit-form-grid {
@@ -2474,6 +2485,7 @@ body.dark-mode .official-content {
 
   .edit-form-actions {
     flex-direction: column;
+    gap: 0.75rem;
   }
 
   .notification {
@@ -2492,4 +2504,50 @@ body.dark-mode .form-group textarea {
 
 body.dark-mode .notification {
   background: var(--surface);
+}
+
+/* Ensure proper scrolling behavior for official page */
+.official-backdrop-page {
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar for better UX */
+.official-backdrop-page::-webkit-scrollbar {
+  width: 6px;
+}
+
+.official-backdrop-page::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+.official-backdrop-page::-webkit-scrollbar-thumb {
+  background: var(--primary);
+  border-radius: 3px;
+}
+
+.official-backdrop-page::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
+}
+
+/* Firefox scrollbar */
+.official-backdrop-page {
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary) rgba(255, 255, 255, 0.1);
+}
+
+/* Ensure edit form is properly positioned when page loads */
+.edit-form-container.scroll-to-view {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

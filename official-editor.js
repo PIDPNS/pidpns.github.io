@@ -159,7 +159,7 @@ class OfficialPageEditor {
 
     // Create edit form
     const formContainer = document.createElement('div');
-    formContainer.className = 'edit-form-container';
+    formContainer.className = 'edit-form-container scroll-to-view';
     formContainer.innerHTML = `
       <div class="edit-form">
         <h2 class="edit-form-title">Edit Official Page Content</h2>
@@ -230,6 +230,17 @@ class OfficialPageEditor {
 
     officialContent.appendChild(formContainer);
 
+    // Scroll to the edit form smoothly
+    setTimeout(() => {
+      const officialPage = document.querySelector('.official-backdrop-page');
+      if (officialPage) {
+        officialPage.scrollTo({
+          top: 0,
+          behavior: 'smooth'
+        });
+      }
+    }, 100);
+
     // Update edit button
     const editBtn = document.querySelector('.official-edit-btn');
     if (editBtn) {
@@ -256,6 +267,17 @@ class OfficialPageEditor {
         el.style.display = '';
       });
     }
+
+    // Scroll back to top to center the content
+    setTimeout(() => {
+      const officialPage = document.querySelector('.official-backdrop-page');
+      if (officialPage) {
+        officialPage.scrollTo({
+          top: 0,
+          behavior: 'smooth'
+        });
+      }
+    }, 100);
 
     // Update edit button
     const editBtn = document.querySelector('.official-edit-btn');
