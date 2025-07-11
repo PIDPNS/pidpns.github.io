@@ -98,17 +98,14 @@ class OfficialBackdropEditor {
   updateMinisterPhoto(photoUrl) {
     const ministerPhoto = document.getElementById('ministerPhoto');
     const ministerPhotoSection = document.querySelector('.minister-photo-section');
-    const officialContent = document.querySelector('.official-content');
     
     if (photoUrl) {
       ministerPhoto.src = photoUrl;
       ministerPhoto.style.display = 'block';
       ministerPhotoSection.classList.add('has-photo');
-      officialContent.classList.add('has-minister-photo'); // Trigger content shift
     } else {
       ministerPhoto.style.display = 'none';
       ministerPhotoSection.classList.remove('has-photo');
-      officialContent.classList.remove('has-minister-photo'); // Remove content shift
     }
   }
 

@@ -95,7 +95,7 @@ body.dark-mode {
   transition: all var(--transition);
 }
 
-/* Minister Photo Section - Positioned absolutely on the left */
+/* Minister Photo Section - Positioned absolutely on the left, behind content */
 .minister-photo-section {
   position: absolute;
   left: 0;
@@ -103,7 +103,7 @@ body.dark-mode {
   transform: translateY(-50%);
   width: 300px;
   height: 400px;
-  z-index: 5;
+  z-index: 1; /* Behind main content */
   pointer-events: auto; /* Always allow interaction */
 }
 
@@ -179,7 +179,7 @@ body.dark-mode {
   cursor: pointer;
 }
 
-/* Main Content Section - Initially centered, shifts right when minister photo exists */
+/* Main Content Section - Always centered, on top of minister photo */
 .main-content-section {
   flex: 1;
   display: flex;
@@ -189,16 +189,8 @@ body.dark-mode {
   text-align: center;
   gap: 1.5rem;
   transition: all var(--transition);
-  margin-left: 0; /* Initially no margin */
-}
-
-/* When minister photo exists, shift content to the right */
-.official-content.has-minister-photo {
-  gap: 3rem; /* Add gap when photo exists */
-}
-
-.official-content.has-minister-photo .main-content-section {
-  margin-left: 320px; /* Shift content right to make room for photo */
+  z-index: 10; /* Above minister photo */
+  position: relative; /* Ensure z-index works */
 }
 
 /* When no photo exists, make the minister section subtle but hoverable */
@@ -2287,16 +2279,10 @@ body.dark-mode .official-content {
     height: 320px;
   }
 
-  /* Reset margin on mobile */
-  .main-content-section,
-  .official-content.has-minister-photo .main-content-section {
+  /* Mobile layout adjustments */
+  .main-content-section {
     margin-left: 0;
     gap: 1rem;
-  }
-
-  /* Remove gap adjustment on mobile */
-  .official-content.has-minister-photo {
-    gap: 2rem;
   }
   
   .official-slogan {
