@@ -2416,7 +2416,7 @@ body.dark-mode .official-content {
   }
 
   .logo-add-overlay {
-    padding: 0.5rem;
+    padding:  0.5rem;
     font-size: 0.7rem;
   }
 
@@ -2622,33 +2622,109 @@ body.dark-mode .official-content {
   gap: 1rem;
 }
 
-/* Mobile responsive user menu */
-@media (max-width: 768px) {
-  .user-menu-dropdown {
-    right: -1rem;
-    left: -1rem;
-    min-width: auto;
-    width: calc(100vw - 2rem);
-    max-width: 320px;
+/* Official Backdrop Loading States */
+.official-content.loading .editable-field,
+.official-content.loading .event-logo,
+.official-content.loading .minister-photo {
+  background: linear-gradient(90deg, 
+    rgba(255, 255, 255, 0.1) 25%, 
+    rgba(255, 255, 255, 0.2) 50%, 
+    rgba(255, 255, 255, 0.1) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  color: transparent !important;
+  border-radius: 8px;
+  min-height: 1.2em;
+  position: relative;
+  overflow: hidden;
+}
+
+.official-content.loading .official-title {
+  min-height: 2.4em;
+  background: linear-gradient(90deg, 
+    rgba(52, 199, 89, 0.1) 25%, 
+    rgba(52, 199, 89, 0.2) 50%, 
+    rgba(52, 199, 89, 0.1) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.official-content.loading .event-logo {
+  min-height: 100px;
+  min-width: 100px;
+  background: linear-gradient(90deg, 
+    rgba(255, 255, 255, 0.08) 25%, 
+    rgba(255, 255, 255, 0.15) 50%, 
+    rgba(255, 255, 255, 0.08) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 12px;
+}
+
+.official-content.loading .minister-photo {
+  background: linear-gradient(90deg, 
+    rgba(255, 255, 255, 0.05) 25%, 
+    rgba(255, 255, 255, 0.12) 50%, 
+    rgba(255, 255, 255, 0.05) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Hide upload overlays during loading */
+.official-content.loading .logo-upload-overlay,
+.official-content.loading .minister-upload-overlay,
+.official-content.loading .logo-add-zone {
+  display: none !important;
+}
+
+/* Shimmer animation */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
   }
-  
-  .user-menu-trigger {
-    padding: 0.375rem;
-  }
-  
-  .user-avatar,
-  .user-initials {
-    width: 28px;
-    height: 28px;
-    font-size: 0.75rem;
+  100% {
+    background-position: 200% 0;
   }
 }
 
-/* Ensure user menu appears above other elements */
-.user-menu-container {
+/* Loading indicator specifically for official backdrop */
+.official-backdrop-loading {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   z-index: 100;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  color: var(--text);
+  font-family: var(--inter);
 }
 
-.user-menu-dropdown {
-  z-index: 1001;
+.official-backdrop-loading.show {
+  display: flex;
+}
+
+.official-loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(52, 199, 89, 0.2);
+  border-top: 3px solid var(--primary);
+  border-radius: 50%;
+  animation: spin 1.2s linear infinite;
+}
+
+.official-loading-text {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--primary);
+  text-align: center;
+}
+
+.official-loading-subtext {
+  font-size: 0.85rem;
+  color: var(--muted);
+  text-align: center;
+  margin-top: 0.25rem;
 }

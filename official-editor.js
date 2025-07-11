@@ -16,8 +16,14 @@ class OfficialBackdropEditor {
 
   async init() {
     try {
+      // Show professional loading state
+      this.showLoadingState();
+      
       // Load current content from database
       await this.loadContent();
+      
+      // Hide loading and show content
+      this.hideLoadingState();
       
       // Setup event listeners
       this.setupEventListeners();
@@ -25,11 +31,47 @@ class OfficialBackdropEditor {
       console.log('Official Backdrop Editor initialized (hover-based editing)');
     } catch (error) {
       console.error('Failed to initialize Official Backdrop Editor:', error);
+      this.hideLoadingState();
+    }
+  }
+
+  showLoadingState() {
+    const officialContent = document.getElementById('officialContent');
+    const loadingIndicator = document.getElementById('officialBackdropLoading');
+    
+    if (officialContent && loadingIndicator) {
+      // Add loading class to content for skeleton effect
+      officialContent.classList.add('loading');
+      
+      // Show loading indicator
+      loadingIndicator.classList.add('show');
+      
+      // Hide any upload overlays and interaction elements
+      officialContent.style.pointerEvents = 'none';
+    }
+  }
+
+  hideLoadingState() {
+    const officialContent = document.getElementById('officialContent');
+    const loadingIndicator = document.getElementById('officialBackdropLoading');
+    
+    if (officialContent && loadingIndicator) {
+      // Remove loading class to show real content
+      officialContent.classList.remove('loading');
+      
+      // Hide loading indicator
+      loadingIndicator.classList.remove('show');
+      
+      // Restore interactions
+      officialContent.style.pointerEvents = 'auto';
     }
   }
 
   async loadContent() {
     try {
+      // Update loading message
+      this.updateLoadingMessage('Connecting to database...');
+      
       const { data, error } = await this.supabase
         .from('official_page_content')
         .select('*')
@@ -39,8 +81,15 @@ class OfficialBackdropEditor {
 
       if (error) {
         console.error('Error loading official page content:', error);
+        this.updateLoadingMessage('Error loading content', true);
         return;
       }
+
+      // Update loading message
+      this.updateLoadingMessage('Formatting content...');
+      
+      // Add a small delay for smooth transition
+      await new Promise(resolve => setTimeout(resolve, 500));
 
       if (data && data.length > 0) {
         this.currentContent = data[0];
@@ -50,6 +99,21 @@ class OfficialBackdropEditor {
       }
     } catch (error) {
       console.error('Failed to load content:', error);
+      this.updateLoadingMessage('Failed to load content', true);
+    }
+  }
+
+  updateLoadingMessage(message, isError = false) {
+    const loadingText = document.querySelector('.official-loading-text');
+    const loadingSubtext = document.querySelector('.official-loading-subtext');
+    
+    if (loadingText) {
+      loadingText.textContent = isError ? 'Loading Error' : 'Loading Official Backdrop';
+    }
+    
+    if (loadingSubtext) {
+      loadingSubtext.textContent = message;
+      loadingSubtext.style.color = isError ? '#FF3B30' : 'var(--muted)';
     }
   }
 

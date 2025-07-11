@@ -322,7 +322,14 @@
         <span>Saving...</span>
       </div>
       
-      <div class="official-content">
+      <!-- Loading Indicator for Official Backdrop -->
+      <div class="official-backdrop-loading" id="officialBackdropLoading">
+        <div class="official-loading-spinner"></div>
+        <div class="official-loading-text">Loading Official Backdrop</div>
+        <div class="official-loading-subtext">Preparing content...</div>
+      </div>
+      
+      <div class="official-content" id="officialContent">
         <!-- Minister Photo Section (Left Side) -->
         <div class="minister-photo-section" data-field="minister_photo_url">
           <div class="minister-photo-container" id="ministerPhotoContainer">
