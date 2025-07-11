@@ -101,6 +101,7 @@ class AuthManager {
       return;
     }
     
+    // Smooth redirect
     window.location.href = 'login.html';
   }
 
