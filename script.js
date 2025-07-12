@@ -298,23 +298,23 @@ document.addEventListener('DOMContentLoaded', function() {
   const messageText = document.getElementById('messageText');
   const messageTime = document.getElementById('messageTime');
 
-  // Photo upload functionality
-  if (photoInput && photoUploadArea) {
-    photoUploadArea.addEventListener('click', () => photoInput.click());
-    
-    photoInput.addEventListener('change', function(e) {
-      const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          photoPreview.src = e.target.result;
-          photoPreviewContainer.style.display = 'block';
-          photoUploadArea.style.display = 'none';
-        };
-        reader.readAsDataURL(file);
-      }
-    });
-  }
+  // Photo upload functionality - DISABLED: Now handled by award-messages.js
+  // if (photoInput && photoUploadArea) {
+  //   photoUploadArea.addEventListener('click', () => photoInput.click());
+  //   
+  //   photoInput.addEventListener('change', function(e) {
+  //     const file = e.target.files[0];
+  //     if (file) {
+  //       const reader = new FileReader();
+  //       reader.onload = function(e) {
+  //         photoPreview.src = e.target.result;
+  //         photoPreviewContainer.style.display = 'block';
+  //         photoUploadArea.style.display = 'none';
+  //       };
+  //       reader.readAsDataURL(file);
+  //     }
+  //   });
+  // }
 
   // Character counter
   if (messageInput) {
@@ -398,38 +398,38 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
-  // Form submission
-  if (messageForm) {
-    messageForm.addEventListener('submit', async function(e) {
-      e.preventDefault();
-      
-      const userName = userSelect.value;
-      const message = messageInput.value.trim();
-      
-      if (!userName || !message) {
-        return;
-      }
+  // Form submission - DISABLED: Now handled by award-messages.js
+  // if (messageForm) {
+  //   messageForm.addEventListener('submit', async function(e) {
+  //     e.preventDefault();
+  //     
+  //     const userName = userSelect.value;
+  //     const message = messageInput.value.trim();
+  //     
+  //     if (!userName || !message) {
+  //       return;
+  //     }
 
-      // Send to Supabase
-      const ok = await sendMessageToSupabase(userName, message);
-      if (ok) {
-        // Reset form
-        messageForm.reset();
-        charCount.textContent = '0';
-        charCount.style.color = 'var(--muted)';
-        
-        // Reset photo preview
-        if (photoPreviewContainer && photoUploadArea) {
-          photoPreviewContainer.style.display = 'none';
-          photoUploadArea.style.display = 'block';
-          photoPreview.src = '';
-        }
-        
-        // Show success popup
-        showMessagePopup(userName, 'Award message sent!');
-      }
-    });
-  }
+  //     // Send to Supabase
+  //     const ok = await sendMessageToSupabase(userName, message);
+  //     if (ok) {
+  //       // Reset form
+  //       messageForm.reset();
+  //       charCount.textContent = '0';
+  //       charCount.style.color = 'var(--muted)';
+  //       
+  //       // Reset photo preview
+  //       if (photoPreviewContainer && photoUploadArea) {
+  //         photoPreviewContainer.style.display = 'none';
+  //         photoUploadArea.style.display = 'block';
+  //         photoPreview.src = '';
+  //       }
+  //       
+  //       // Show success popup
+  //       showMessagePopup(userName, 'Award message sent!');
+  //     }
+  //   });
+  // }
 
   // Message popup functionality
   function showMessagePopup(author, text) {

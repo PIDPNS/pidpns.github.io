@@ -457,6 +457,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="auth.js"></script>
   <script src="official-editor.js"></script>
+  <script src="award-messages.js"></script>
   <script src="script.js"></script>
   <script>
     // Initialize authentication before anything else
@@ -482,6 +483,14 @@
           // Initialize official backdrop editor
           if (typeof initializeOfficialBackdropEditor === 'function') {
             initializeOfficialBackdropEditor(supabase);
+          }
+          
+          // Initialize award messages system
+          if (typeof AwardMessagesManager !== 'undefined') {
+            console.log('Initializing AwardMessagesManager with supabase client:', !!supabase, 'auth available:', !!(supabase && supabase.auth));
+            window.awardMessagesManager = new AwardMessagesManager(supabase);
+            // Also make supabase globally available for the award messages
+            window.supabaseClient = supabase;
           }
           
           console.log('Digital Backdrop initialized with authentication');
