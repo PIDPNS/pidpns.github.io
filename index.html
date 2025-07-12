@@ -116,6 +116,59 @@
             <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3A7 7 0 0 0 21 12.79z"/></svg>
           </span>
         </button>
+        <!-- Animation Selector -->
+        <div class="animation-selector-container">
+          <button class="animation-selector-trigger" id="animationSelectorTrigger" aria-label="Change background animation">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="m8 4.5 2.5 2.5"/>
+              <path d="m8 19.5 2.5-2.5"/>
+              <path d="m15.5 4.5-2.5 2.5"/>
+              <path d="m15.5 19.5-2.5-2.5"/>
+              <path d="m19.5 8-2.5 2.5"/>
+              <path d="m4.5 8 2.5 2.5"/>
+              <path d="m19.5 15-2.5-2.5"/>
+              <path d="m4.5 15 2.5-2.5"/>
+            </svg>
+          </button>
+          <div class="animation-selector-dropdown" id="animationSelectorDropdown">
+            <div class="animation-selector-header">
+              <span>Background Animation</span>
+            </div>
+            <div class="animation-selector-items">
+              <button class="animation-option active" data-animation="particles">
+                <div class="animation-preview">
+                  <div class="preview-particles"></div>
+                </div>
+                <span>Data Particles</span>
+              </button>
+              <button class="animation-option" data-animation="waves">
+                <div class="animation-preview">
+                  <div class="preview-waves"></div>
+                </div>
+                <span>Wave Flow</span>
+              </button>
+              <button class="animation-option" data-animation="matrix">
+                <div class="animation-preview">
+                  <div class="preview-matrix"></div>
+                </div>
+                <span>Matrix Rain</span>
+              </button>
+              <button class="animation-option" data-animation="geometric">
+                <div class="animation-preview">
+                  <div class="preview-geometric"></div>
+                </div>
+                <span>Geometric</span>
+              </button>
+              <button class="animation-option" data-animation="none">
+                <div class="animation-preview">
+                  <div class="preview-none"></div>
+                </div>
+                <span>None</span>
+              </button>
+            </div>
+          </div>
+        </div>
         <!-- User Menu -->
         <div class="user-menu-container">
           <button class="user-menu-trigger" id="userMenuTrigger" aria-label="User menu">
@@ -455,6 +508,7 @@
     </div>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="background-animations.js"></script>
   <script src="auth.js"></script>
   <script src="official-editor.js"></script>
   <script src="award-messages.js"></script>

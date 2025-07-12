@@ -1,6 +1,7 @@
 /* Base and theme variables */
 :root {
   --primary: #34C759;
+  --primary-rgb: 52, 199, 89;
   --accent: #28A745;
   --background: #F5F5F7;
   --surface: rgba(255,255,255,0.8);
@@ -19,6 +20,7 @@
 
 body.dark-mode {
   --primary: #30D158;
+  --primary-rgb: 48, 209, 88;
   --accent: #28A745;
   --background: #000000;
   --surface: rgba(28,28,30,0.8);
@@ -308,6 +310,171 @@ body.dark-mode .icon-moon {
   display: block;
   color: #f4f8fb;
 }
+
+/* Animation Selector */
+.animation-selector-container {
+  position: relative;
+  display: inline-block;
+}
+
+.animation-selector-trigger {
+  width: 44px;
+  height: 44px;
+  background: var(--surface);
+  backdrop-filter: blur(var(--surface-blur));
+  -webkit-backdrop-filter: blur(var(--surface-blur));
+  border: 1px solid var(--glass-border);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text);
+  cursor: pointer;
+  transition: all var(--transition);
+  box-shadow: var(--shadow);
+}
+
+.animation-selector-trigger:hover {
+  background: rgba(var(--primary-rgb), 0.1);
+  border-color: var(--primary);
+  transform: translateY(-1px);
+  box-shadow: 0 12px 24px rgba(0,0,0,0.15), 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.animation-selector-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: var(--surface);
+  backdrop-filter: blur(var(--surface-blur));
+  -webkit-backdrop-filter: blur(var(--surface-blur));
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.15), 0 8px 16px rgba(0,0,0,0.1);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all var(--transition);
+  z-index: 1000;
+  min-width: 200px;
+}
+
+.animation-selector-dropdown.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.animation-selector-header {
+  padding: 1rem 1.2rem 0.5rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--text);
+  border-bottom: 1px solid var(--glass-border);
+  margin-bottom: 0.5rem;
+}
+
+.animation-selector-items {
+  padding: 0.5rem;
+}
+
+.animation-option {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.8rem;
+  background: none;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all var(--transition);
+  color: var(--text);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.animation-option:hover {
+  background: rgba(var(--primary-rgb), 0.1);
+}
+
+.animation-option.active {
+  background: var(--primary);
+  color: white;
+}
+
+.animation-preview {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  background: var(--muted);
+  position: relative;
+  overflow: hidden;
+  opacity: 0.7;
+}
+
+.animation-option.active .animation-preview {
+  opacity: 1;
+}
+
+/* Animation Preview Styles */
+.preview-particles {
+  background: radial-gradient(circle at 30% 30%, var(--primary) 2px, transparent 2px),
+              radial-gradient(circle at 70% 60%, var(--accent) 1px, transparent 1px),
+              radial-gradient(circle at 20% 80%, var(--primary) 1.5px, transparent 1.5px);
+  background-size: 8px 8px, 12px 12px, 10px 10px;
+  animation: float 3s ease-in-out infinite;
+}
+
+.preview-waves {
+  background: linear-gradient(45deg, transparent 40%, var(--primary) 50%, transparent 60%),
+              linear-gradient(-45deg, transparent 40%, var(--accent) 50%, transparent 60%);
+  background-size: 12px 12px, 8px 8px;
+  animation: wave 2s linear infinite;
+}
+
+.preview-matrix {
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    var(--primary) 2px,
+    var(--primary) 3px
+  );
+  animation: matrix 1.5s linear infinite;
+}
+
+.preview-geometric {
+  background: conic-gradient(from 0deg, var(--primary), var(--accent), var(--primary));
+  border-radius: 4px;
+  animation: rotate 2s linear infinite;
+}
+
+.preview-none {
+  background: var(--background);
+  border: 1px solid var(--glass-border);
+}
+
+/* Animation Keyframes */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+
+@keyframes wave {
+  0% { background-position: 0 0, 0 0; }
+  100% { background-position: 12px 12px, -8px -8px; }
+}
+
+@keyframes matrix {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
+}
+
+@keyframes rotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
 /* Canvas sizing */
 #circuitLines {
   position: absolute;
@@ -317,7 +484,6 @@ body.dark-mode .icon-moon {
   height: 100%;
   z-index: 0;
   pointer-events: none;
-  aspect-ratio: 16/9;
 }
 
 /* Main content sizing with fixed height */

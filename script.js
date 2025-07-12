@@ -20,177 +20,169 @@ document.addEventListener('DOMContentLoaded', function() {
     localStorage.setItem('themeMode', mode);
   }
 
-  // Professional floating data particles animation
-  const circuitCanvas = document.getElementById('circuitLines');
-  if (circuitCanvas) {
+  // Simple fallback animation if the complex system fails
+  function initSimpleParticles() {
+    const circuitCanvas = document.getElementById('circuitLines');
+    if (!circuitCanvas) return;
+
     let width = circuitCanvas.width = circuitCanvas.offsetWidth;
     let height = circuitCanvas.height = circuitCanvas.offsetHeight;
     const ctx = circuitCanvas.getContext('2d');
     
-    function resizeCircuit() {
-      width = circuitCanvas.width = circuitCanvas.offsetWidth;
-      height = circuitCanvas.height = circuitCanvas.offsetHeight;
-    }
-    window.addEventListener('resize', resizeCircuit);
+    const particles = [];
+    const particleCount = 30;
 
-    // Particle class for data elements
-    class DataParticle {
+    class SimpleParticle {
       constructor() {
-        this.reset();
-      }
-
-      reset() {
         this.x = Math.random() * width;
         this.y = Math.random() * height;
         this.vx = (Math.random() - 0.5) * 0.5;
         this.vy = (Math.random() - 0.5) * 0.5;
-        this.size = Math.random() * 3 + 1;
-        this.opacity = Math.random() * 0.6 + 0.2;
-        this.type = Math.floor(Math.random() * 3); // 0: circle, 1: square, 2: hexagon
-        this.pulse = Math.random() * Math.PI * 2;
-        this.pulseSpeed = Math.random() * 0.02 + 0.01;
+        this.size = Math.random() * 2 + 1;
+        this.opacity = Math.random() * 0.5 + 0.3;
       }
 
       update() {
         this.x += this.vx;
         this.y += this.vy;
-        this.pulse += this.pulseSpeed;
 
-        // Wrap around edges
-        if (this.x < -10) this.x = width + 10;
-        if (this.x > width + 10) this.x = -10;
-        if (this.y < -10) this.y = height + 10;
-        if (this.y > height + 10) this.y = -10;
-
-        // Occasional direction change
-        if (Math.random() < 0.005) {
-          this.vx = (Math.random() - 0.5) * 0.5;
-          this.vy = (Math.random() - 0.5) * 0.5;
-        }
+        if (this.x < 0) this.x = width;
+        if (this.x > width) this.x = 0;
+        if (this.y < 0) this.y = height;
+        if (this.y > height) this.y = 0;
       }
 
       draw() {
         ctx.save();
-        const pulseFactor = 0.8 + 0.2 * Math.sin(this.pulse);
-        const currentSize = this.size * pulseFactor;
-        const currentOpacity = this.opacity * pulseFactor;
-
-        // Set color based on theme
-        const isDark = body.classList.contains('dark-mode');
-        const primaryColor = isDark ? '#30D158' : '#34C759';
-        const accentColor = isDark ? '#5E5CE6' : '#5856D6';
-
-        ctx.fillStyle = `rgba(${isDark ? '48,209,88' : '52,199,89'}, ${currentOpacity})`;
-        ctx.strokeStyle = `rgba(${isDark ? '40,167,69' : '40,167,69'}, ${currentOpacity * 0.6})`;
-        ctx.lineWidth = 1;
-        ctx.shadowColor = primaryColor;
-        ctx.shadowBlur = 8 * pulseFactor;
-
+        const isDark = document.body.classList.contains('dark-mode');
+        ctx.fillStyle = `rgba(${isDark ? '48,209,88' : '52,199,89'}, ${this.opacity})`;
         ctx.beginPath();
-        
-        switch (this.type) {
-          case 0: // Circle
-            ctx.arc(this.x, this.y, currentSize, 0, Math.PI * 2);
-            break;
-          case 1: // Square
-            const halfSize = currentSize / 2;
-            ctx.rect(this.x - halfSize, this.y - halfSize, currentSize, currentSize);
-            break;
-          case 2: // Hexagon
-            for (let i = 0; i < 6; i++) {
-              const angle = (i * Math.PI) / 3;
-              const px = this.x + currentSize * Math.cos(angle);
-              const py = this.y + currentSize * Math.sin(angle);
-              if (i === 0) ctx.moveTo(px, py);
-              else ctx.lineTo(px, py);
-            }
-            ctx.closePath();
-            break;
-        }
-
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
         ctx.fill();
-        ctx.stroke();
         ctx.restore();
       }
     }
-
-    // Connection lines between nearby particles
-    class Connection {
-      constructor(particle1, particle2) {
-        this.p1 = particle1;
-        this.p2 = particle2;
-        this.opacity = 0;
-        this.maxOpacity = Math.random() * 0.3 + 0.1;
-      }
-
-      update() {
-        const dx = this.p2.x - this.p1.x;
-        const dy = this.p2.y - this.p1.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        
-        if (distance < 120 && distance > 20) {
-          this.opacity = this.maxOpacity * (1 - distance / 120);
-        } else {
-          this.opacity = 0;
-        }
-      }
-
-      draw() {
-        if (this.opacity <= 0) return;
-
-        ctx.save();
-        const isDark = body.classList.contains('dark-mode');
-        ctx.strokeStyle = `rgba(${isDark ? '48,209,88' : '52,199,89'}, ${this.opacity})`;
-        ctx.lineWidth = 1;
-        ctx.shadowColor = isDark ? '#30D158' : '#34C759';
-        ctx.shadowBlur = 4;
-
-        ctx.beginPath();
-        ctx.moveTo(this.p1.x, this.p1.y);
-        ctx.lineTo(this.p2.x, this.p2.y);
-        ctx.stroke();
-        ctx.restore();
-      }
-    }
-
-    // Initialize particles and connections
-    const particles = [];
-    const connections = [];
-    const particleCount = 45;
-    const connectionCount = 25;
 
     for (let i = 0; i < particleCount; i++) {
-      particles.push(new DataParticle());
+      particles.push(new SimpleParticle());
     }
 
-    for (let i = 0; i < connectionCount; i++) {
-      const p1 = particles[Math.floor(Math.random() * particles.length)];
-      const p2 = particles[Math.floor(Math.random() * particles.length)];
-      if (p1 !== p2) {
-        connections.push(new Connection(p1, p2));
-      }
-    }
-
-    // Animation loop
     function animate() {
       ctx.clearRect(0, 0, width, height);
-
-      // Update and draw connections first (background)
-      connections.forEach(conn => {
-        conn.update();
-        conn.draw();
-      });
-
-      // Update and draw particles
       particles.forEach(particle => {
         particle.update();
         particle.draw();
       });
-
       requestAnimationFrame(animate);
     }
 
+    window.addEventListener('resize', () => {
+      width = circuitCanvas.width = circuitCanvas.offsetWidth;
+      height = circuitCanvas.height = circuitCanvas.offsetHeight;
+    });
+
     animate();
+  }
+
+  // Initialize Background Animation System
+  let backgroundAnimationManager;
+  
+  // Wait for DOM to be ready before initializing animations
+  function initializeAnimations() {
+    try {
+      if (typeof BackgroundAnimationManager !== 'undefined') {
+        backgroundAnimationManager = new BackgroundAnimationManager('circuitLines');
+      } else {
+        initSimpleParticles();
+      }
+    } catch (error) {
+      console.error('Error initializing animations:', error);
+      initSimpleParticles();
+    }
+  }
+
+  // Initialize animations after DOM is loaded
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeAnimations);
+  } else {
+    initializeAnimations();
+  }
+
+  // Animation Selector functionality
+  function initializeAnimationSelector() {
+    const animationSelectorTrigger = document.getElementById('animationSelectorTrigger');
+    const animationSelectorDropdown = document.getElementById('animationSelectorDropdown');
+    
+    if (!animationSelectorTrigger || !animationSelectorDropdown) {
+      console.log('Animation selector elements not found');
+      return;
+    }
+    
+    let isAnimationMenuOpen = false;
+    
+    // Toggle dropdown
+    animationSelectorTrigger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      isAnimationMenuOpen = !isAnimationMenuOpen;
+      animationSelectorDropdown.classList.toggle('show', isAnimationMenuOpen);
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', () => {
+      if (isAnimationMenuOpen) {
+        isAnimationMenuOpen = false;
+        animationSelectorDropdown.classList.remove('show');
+      }
+    });
+
+    // Prevent dropdown from closing when clicking inside
+    animationSelectorDropdown.addEventListener('click', (e) => {
+      e.stopPropagation();
+    });
+
+    // Handle animation selection
+    const animationOptions = document.querySelectorAll('.animation-option');
+    
+    animationOptions.forEach(option => {
+      option.addEventListener('click', () => {
+        const animationType = option.dataset.animation;
+        
+        // Update active state
+        animationOptions.forEach(opt => opt.classList.remove('active'));
+        option.classList.add('active');
+        
+        // Set animation
+        if (backgroundAnimationManager && backgroundAnimationManager.setAnimation) {
+          try {
+            backgroundAnimationManager.setAnimation(animationType);
+          } catch (error) {
+            console.error('Error setting animation:', error);
+          }
+        } else {
+          console.error('Background animation manager not available');
+        }
+        
+        // Close dropdown
+        isAnimationMenuOpen = false;
+        animationSelectorDropdown.classList.remove('show');
+      });
+    });
+
+    // Set initial active state based on stored preference
+    const storedAnimation = localStorage.getItem('backgroundAnimation') || 'particles';
+    
+    const activeOption = document.querySelector(`[data-animation="${storedAnimation}"]`);
+    if (activeOption) {
+      animationOptions.forEach(opt => opt.classList.remove('active'));
+      activeOption.classList.add('active');
+    }
+  }
+
+  // Initialize animation selector after DOM is loaded
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeAnimationSelector);
+  } else {
+    initializeAnimationSelector();
   }
 
   // Event info slider auto-advance
