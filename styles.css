@@ -190,6 +190,7 @@ body.dark-mode {
   transition: all var(--transition);
   z-index: 10; /* Above minister photo */
   position: relative; /* Ensure z-index works */
+  margin-top: -20px;
 }
 
 /* When no photo exists, make the minister section subtle but hoverable */
@@ -2135,7 +2136,6 @@ body.dark-mode .editable-field.editing {
   align-items: center;
   justify-content: center;
   margin-bottom: 0.2rem;
-  gap: 1rem;
   min-height: 140px;
   position: relative;
 }
@@ -2199,7 +2199,6 @@ body.dark-mode .editable-field.editing {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 1.5rem;
   flex-wrap: wrap;
   min-height: 120px;
 }
