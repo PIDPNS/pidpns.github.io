@@ -2142,8 +2142,8 @@ body.dark-mode .editable-field.editing {
 }
 
 .logo-add-zone {
-  width: 100px;
-  height: 100px;
+  width: 90px;
+  height: 90px;
   position: relative;
   opacity: 0;
   transition: all var(--transition);
@@ -2208,8 +2208,8 @@ body.dark-mode .editable-field.editing {
 .editable-logo-container {
   position: relative;
   transition: all var(--transition);
-  min-width: 100px;
-  min-height: 100px;
+  min-width: 90px;
+  min-height: 90px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2223,9 +2223,9 @@ body.dark-mode .editable-field.editing {
 }
 
 .event-logo {
-  width: 100px;
+  width: 90px;
   height: auto;
-  max-height: 100px;
+  max-height: 90px;
   object-fit: contain;
   transition: all var(--transition);
 }
@@ -2406,8 +2406,8 @@ body.dark-mode .official-content {
   }
 
   .logo-add-zone {
-    width: 80px;
-    height: 80px;
+    width: 70px;
+    height: 70px;
     order: 3; /* Move add zones below logos on mobile */
   }
 
@@ -2425,13 +2425,13 @@ body.dark-mode .official-content {
   }
 
   .event-logo {
-    width: 80px;
-    max-height: 80px;
+    width: 70px;
+    max-height: 70px;
   }
 
   .editable-logo-container {
-    min-width: 80px;
-    min-height: 80px;
+    min-width: 70px;
+    min-height: 70px;
   }
 
   .logo-add-overlay {
