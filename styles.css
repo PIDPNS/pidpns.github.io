@@ -1117,6 +1117,11 @@ body.dark-mode .message-popup {
   margin-bottom: 0.8rem;
   border-radius: 8px;
   overflow: hidden;
+  background: var(--glass-bg);
+  min-height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .message-image {
@@ -1125,6 +1130,346 @@ body.dark-mode .message-popup {
   object-fit: cover;
   border-radius: 8px;
   border: 1px solid rgba(var(--primary-rgb), 0.2);
+  background: var(--surface);
+  transition: opacity 0.3s ease;
+}
+
+/* ========================================
+   SPOTLIGHT CAROUSEL STYLES
+======================================== */
+
+.spotlight-showcase-container {
+  width: 100%;
+  max-width: 1400px;
+  height: 750px;
+  display: flex;
+  flex-direction: column;
+  margin: 0 auto;
+  padding: 2rem;
+  box-sizing: border-box;
+  background: none !important;
+  z-index: 3;
+}
+
+.spotlight-layout {
+  display: flex;
+  gap: 2rem;
+  height: 100%;
+  flex: 1;
+}
+
+/* Main Spotlight Area (70%) */
+.spotlight-main {
+  flex: 0 0 70%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.spotlight-container {
+  flex: 1;
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 8px 32px rgba(0,122,255,0.15);
+  min-height: 500px;
+}
+
+.spotlight-item {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 0.8s ease-in-out;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.spotlight-item.active {
+  opacity: 1;
+}
+
+.spotlight-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.spotlight-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(transparent, rgba(0,0,0,0.8));
+  padding: 2rem;
+  color: white;
+}
+
+.spotlight-author {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+.spotlight-message {
+  font-size: 1.2rem;
+  line-height: 1.5;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+  opacity: 0.95;
+}
+
+.spotlight-time {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: rgba(0,0,0,0.6);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  backdrop-filter: blur(10px);
+}
+
+/* Spotlight Placeholder */
+.spotlight-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--glass-bg);
+}
+
+.spotlight-placeholder-content {
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+.spotlight-placeholder-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.spotlight-placeholder h3 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+  color: var(--text);
+}
+
+.spotlight-placeholder p {
+  font-size: 1rem;
+  opacity: 0.8;
+}
+
+/* Spotlight Controls */
+.spotlight-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding: 1rem 0;
+}
+
+.spotlight-nav {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.spotlight-nav:hover {
+  background: var(--primary);
+  color: white;
+  transform: scale(1.1);
+}
+
+.spotlight-nav:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.spotlight-indicators {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.spotlight-indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--glass-border);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.spotlight-indicator.active {
+  background: var(--primary);
+  transform: scale(1.2);
+}
+
+/* Recent Messages Queue (30%) */
+.messages-queue {
+  flex: 0 0 30%;
+  display: flex;
+  flex-direction: column;
+}
+
+.queue-title {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--primary);
+}
+
+.queue-container {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding-right: 0.5rem;
+}
+
+.queue-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.queue-container::-webkit-scrollbar-track {
+  background: var(--glass-bg);
+  border-radius: 3px;
+}
+
+.queue-container::-webkit-scrollbar-thumb {
+  background: var(--glass-border);
+  border-radius: 3px;
+}
+
+.queue-container::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
+
+.queue-item {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.queue-item:hover {
+  background: var(--surface);
+  border-color: var(--primary);
+  transform: translateX(4px);
+}
+
+.queue-item.featured {
+  border-color: var(--primary);
+  background: rgba(var(--primary-rgb), 0.1);
+}
+
+.queue-image {
+  width: 60px;
+  height: 45px;
+  object-fit: cover;
+  border-radius: 8px;
+  background: var(--surface);
+  flex-shrink: 0;
+}
+
+.queue-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.queue-author {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--text);
+  margin-bottom: 0.25rem;
+}
+
+.queue-message {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-clamp: 2;
+  overflow: hidden;
+}
+
+.queue-time {
+  font-size: 0.7rem;
+  color: var(--muted);
+  margin-top: 0.25rem;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .spotlight-layout {
+    flex-direction: column;
+  }
+  
+  .spotlight-main {
+    flex: 0 0 60%;
+  }
+  
+  .messages-queue {
+    flex: 0 0 40%;
+  }
+  
+  .queue-container {
+    max-height: 200px;
+  }
+}
+
+@media (max-width: 768px) {
+  .spotlight-showcase-container {
+    padding: 1rem;
+  }
+  
+  .spotlight-layout {
+    gap: 1rem;
+  }
+  
+  .spotlight-overlay {
+    padding: 1rem;
+  }
+  
+  .spotlight-author {
+    font-size: 1.4rem;
+  }
+  
+  .spotlight-message {
+    font-size: 1rem;
+  }
+  
+  .queue-item {
+    padding: 0.75rem;
+  }
 }
 
 /* Message Form Styles */

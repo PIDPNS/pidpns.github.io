@@ -357,38 +357,49 @@ class AwardMessagesManager {
       const fileExt = file.name.split('.').pop();
       const fileName = `message_photo_${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
 
-      // Try uploading to message-photos bucket first
-      let uploadResult = await client.storage
+      // Upload to message-photos bucket only
+      const uploadResult = await client.storage
         .from('message-photos')
         .upload(fileName, file, {
           cacheControl: '3600',
           upsert: false
         });
 
-      // If message-photos bucket fails, try photos bucket as fallback
       if (uploadResult.error) {
-        console.log('message-photos bucket failed, trying photos bucket...', uploadResult.error);
-        uploadResult = await client.storage
-          .from('photos')
-          .upload(fileName, file, {
-            cacheControl: '3600',
-            upsert: false
-          });
-      }
-
-      if (uploadResult.error) {
-        console.error('Storage upload error:', uploadResult.error);
+        console.error('Storage upload error to message-photos bucket:', uploadResult.error);
         if (uploadResult.error.message?.includes('row-level security') || uploadResult.error.statusCode === '403') {
-          throw new Error('Storage access denied. Please ensure the storage bucket is set up correctly. Try running the setup-message-photos-bucket.sql file in your Supabase SQL Editor.');
+          throw new Error('Storage access denied to message-photos bucket. Please ensure the bucket is set up correctly and publicly accessible.');
         }
-        throw uploadResult.error;
+        throw new Error(`Failed to upload to message-photos bucket: ${uploadResult.error.message}`);
       }
 
-      // Get public URL from the successful bucket
-      const bucketName = uploadResult.data?.path?.includes('message-photos') ? 'message-photos' : 'photos';
+      console.log('Successfully uploaded to message-photos bucket:', fileName);
+
+      // Get URL from message-photos bucket
+      const bucketName = 'message-photos';
+      
+      // Try to get a signed URL first (works better with CORS and access issues)
+      try {
+        const { data: signedUrlData, error: signedUrlError } = await client.storage
+          .from(bucketName)
+          .createSignedUrl(fileName, 60 * 60 * 24 * 365); // 1 year expiry
+        
+        if (!signedUrlError && signedUrlData?.signedUrl) {
+          console.log('Generated signed URL from message-photos:', signedUrlData.signedUrl);
+          return signedUrlData.signedUrl;
+        }
+      } catch (signedUrlErr) {
+        console.log('Signed URL failed, falling back to public URL:', signedUrlErr);
+      }
+      
+      // Fallback to public URL
       const { data: urlData } = client.storage
         .from(bucketName)
         .getPublicUrl(fileName);
+
+      console.log('Generated photo URL from message-photos:', urlData.publicUrl);
+      console.log('Using bucket:', bucketName);
+      console.log('File name:', fileName);
 
       return urlData.publicUrl;
 

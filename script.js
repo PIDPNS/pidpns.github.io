@@ -441,72 +441,321 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 7000);
   }
 
-  // --- Real-time Message Display ---
+  // --- Real-time Message Display with Spotlight Carousel ---
   const messagesPopups = document.getElementById('messagesPopups');
+  const spotlightContainer = document.getElementById('spotlightContainer');
+  const messagesQueue = document.getElementById('messagesQueue');
+  const spotlightIndicators = document.getElementById('spotlightIndicators');
+  const spotlightPrev = document.getElementById('spotlightPrev');
+  const spotlightNext = document.getElementById('spotlightNext');
+  
   let supabaseMessagesSubscription = null;
+  let spotlightMessages = [];
+  let currentSpotlightIndex = 0;
+  let spotlightInterval = null;
+
+  // Spotlight Carousel Manager
+  class SpotlightCarousel {
+    constructor() {
+      this.messages = [];
+      this.currentIndex = 0;
+      this.isPlaying = true;
+      this.interval = null;
+      this.autoPlayDelay = 8000; // 8 seconds
+      
+      this.init();
+    }
+    
+    init() {
+      // Set up navigation listeners
+      if (spotlightPrev) {
+        spotlightPrev.addEventListener('click', () => this.prev());
+      }
+      if (spotlightNext) {
+        spotlightNext.addEventListener('click', () => this.next());
+      }
+      
+      // Start auto-play
+      this.startAutoPlay();
+    }
+    
+    clearMessages() {
+      // Clear the messages array
+      this.messages = [];
+      this.currentIndex = 0;
+      
+      // Clear spotlight container
+      if (spotlightContainer) {
+        const existingItems = spotlightContainer.querySelectorAll('.spotlight-item');
+        existingItems.forEach(item => item.remove());
+        this.showPlaceholder();
+      }
+      
+      // Clear queue container
+      if (messagesQueue) {
+        messagesQueue.innerHTML = '';
+      }
+      
+      // Clear indicators
+      if (spotlightIndicators) {
+        spotlightIndicators.innerHTML = '';
+      }
+      
+      // Stop auto-play
+      this.stopAutoPlay();
+    }
+    
+    addMessage(message) {
+      // Add to beginning of array (newest first)
+      this.messages.unshift(message);
+      
+      // Limit to 10 messages maximum
+      if (this.messages.length > 10) {
+        this.messages = this.messages.slice(0, 10);
+      }
+      
+      this.updateSpotlight();
+      this.updateQueue();
+      this.updateIndicators();
+      
+      // Reset to first message when new one arrives
+      this.currentIndex = 0;
+      this.showMessage(0);
+      this.restartAutoPlay();
+    }
+    
+    updateSpotlight() {
+      if (!spotlightContainer || this.messages.length === 0) {
+        this.showPlaceholder();
+        return;
+      }
+      
+      // Clear existing spotlight items
+      const existingItems = spotlightContainer.querySelectorAll('.spotlight-item');
+      existingItems.forEach(item => item.remove());
+      
+      // Create spotlight items for each message
+      this.messages.forEach((message, index) => {
+        const spotlightItem = this.createSpotlightItem(message, index);
+        spotlightContainer.appendChild(spotlightItem);
+      });
+      
+      this.showMessage(this.currentIndex);
+    }
+    
+    createSpotlightItem(message, index) {
+      const item = document.createElement('div');
+      item.className = 'spotlight-item';
+      item.dataset.index = index;
+      
+      const timeStr = message.created_at ? 
+        new Date(message.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 
+        'Just now';
+      
+      item.innerHTML = `
+        ${message.image_url ? `<img src="${message.image_url}" alt="${message.author}'s photo" class="spotlight-image" 
+             onerror="this.style.display='none';">` : ''}
+        <div class="spotlight-overlay">
+          <div class="spotlight-author">${message.author}</div>
+          <div class="spotlight-message">${message.content}</div>
+        </div>
+        <div class="spotlight-time">${timeStr}</div>
+      `;
+      
+      return item;
+    }
+    
+    showPlaceholder() {
+      if (!spotlightContainer) return;
+      
+      spotlightContainer.innerHTML = `
+        <div class="spotlight-placeholder">
+          <div class="spotlight-placeholder-content">
+            <div class="spotlight-placeholder-icon">🎭</div>
+            <h3>Waiting for Character Submissions</h3>
+            <p>Submit your character photo to see it featured here!</p>
+          </div>
+        </div>
+      `;
+    }
+    
+    showMessage(index) {
+      if (!spotlightContainer || this.messages.length === 0) return;
+      
+      const items = spotlightContainer.querySelectorAll('.spotlight-item');
+      items.forEach((item, i) => {
+        item.classList.toggle('active', i === index);
+      });
+      
+      this.currentIndex = index;
+      this.updateIndicators();
+      this.updateQueueHighlight();
+    }
+    
+    updateQueue() {
+      if (!messagesQueue) return;
+      
+      messagesQueue.innerHTML = '';
+      
+      this.messages.forEach((message, index) => {
+        const queueItem = this.createQueueItem(message, index);
+        messagesQueue.appendChild(queueItem);
+      });
+    }
+    
+    createQueueItem(message, index) {
+      const item = document.createElement('div');
+      item.className = 'queue-item';
+      item.dataset.index = index;
+      
+      const timeStr = message.created_at ? 
+        new Date(message.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 
+        'Just now';
+      
+      item.innerHTML = `
+        ${message.image_url ? `<img src="${message.image_url}" alt="${message.author}" class="queue-image" 
+             onerror="this.style.display='none';">` : 
+          '<div class="queue-image" style="background: var(--glass-bg); display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 0.7rem;">No Image</div>'}
+        <div class="queue-content">
+          <div class="queue-author">${message.author}</div>
+          <div class="queue-message">${message.content}</div>
+          <div class="queue-time">${timeStr}</div>
+        </div>
+      `;
+      
+      // Add click listener to jump to this message in spotlight
+      item.addEventListener('click', () => {
+        this.showMessage(index);
+        this.restartAutoPlay();
+      });
+      
+      return item;
+    }
+    
+    updateIndicators() {
+      if (!spotlightIndicators) return;
+      
+      spotlightIndicators.innerHTML = '';
+      
+      this.messages.forEach((_, index) => {
+        const indicator = document.createElement('div');
+        indicator.className = 'spotlight-indicator';
+        if (index === this.currentIndex) {
+          indicator.classList.add('active');
+        }
+        
+        indicator.addEventListener('click', () => {
+          this.showMessage(index);
+          this.restartAutoPlay();
+        });
+        
+        spotlightIndicators.appendChild(indicator);
+      });
+      
+      // Update navigation buttons
+      if (spotlightPrev) {
+        spotlightPrev.disabled = this.messages.length <= 1;
+      }
+      if (spotlightNext) {
+        spotlightNext.disabled = this.messages.length <= 1;
+      }
+    }
+    
+    updateQueueHighlight() {
+      if (!messagesQueue) return;
+      
+      const queueItems = messagesQueue.querySelectorAll('.queue-item');
+      queueItems.forEach((item, index) => {
+        item.classList.toggle('featured', index === this.currentIndex);
+      });
+    }
+    
+    next() {
+      if (this.messages.length <= 1) return;
+      
+      const nextIndex = (this.currentIndex + 1) % this.messages.length;
+      this.showMessage(nextIndex);
+    }
+    
+    prev() {
+      if (this.messages.length <= 1) return;
+      
+      const prevIndex = this.currentIndex === 0 ? this.messages.length - 1 : this.currentIndex - 1;
+      this.showMessage(prevIndex);
+    }
+    
+    startAutoPlay() {
+      if (this.interval) return;
+      
+      this.interval = setInterval(() => {
+        if (this.messages.length > 1 && this.isPlaying) {
+          this.next();
+        }
+      }, this.autoPlayDelay);
+    }
+    
+    stopAutoPlay() {
+      if (this.interval) {
+        clearInterval(this.interval);
+        this.interval = null;
+      }
+    }
+    
+    restartAutoPlay() {
+      this.stopAutoPlay();
+      this.startAutoPlay();
+    }
+    
+    pause() {
+      this.isPlaying = false;
+    }
+    
+    resume() {
+      this.isPlaying = true;
+    }
+  }
+  
+  // Initialize Spotlight Carousel
+  let spotlightCarousel = null;
 
   function renderMessagePopup({ author, content, created_at, image_url }) {
-    if (!messagesPopups) return;
-    // Fade out title and status
+    console.log('Rendering message popup:', { author, content, image_url });
+    
+    // Initialize carousel if not exists
+    if (!spotlightCarousel) {
+      spotlightCarousel = new SpotlightCarousel();
+    }
+    
+    // Add message to spotlight carousel
+    spotlightCarousel.addMessage({ author, content, created_at, image_url });
+    
+    // Hide title and status when we have messages
     const liveTitle = document.getElementById('liveMessagesTitle');
     const status = document.getElementById('messagesStatus');
     if (liveTitle) liveTitle.classList.add('live-messages-fade');
     if (status) status.classList.add('live-messages-fade');
-    // Create popup element
-    const popup = document.createElement('div');
-    popup.className = 'message-popup show';
-    
-    // Prepare image HTML if image_url exists
-    const imageHtml = image_url ? `
-      <div class="message-image-container">
-        <img src="${image_url}" alt="${author}'s photo" class="message-image" />
-      </div>
-    ` : '';
-    
-    popup.innerHTML = `
-      <div class="message-content">
-        <div class="message-header">
-          <span class="message-author">${author}</span>
-          <span class="message-time">${created_at ? new Date(created_at).toLocaleTimeString() : 'Just now'}</span>
-        </div>
-        ${imageHtml}
-        <div class="message-text">${content}</div>
-      </div>
-    `;
-    // Delay showing the popup until fade-out is mostly complete
-    setTimeout(() => {
-      messagesPopups.appendChild(popup);
-      // Trigger bounce animation
-      setTimeout(() => {
-        popup.classList.add('bounce');
-      }, 10);
-      // Remove after 5 seconds (plus delay)
-      setTimeout(() => {
-        popup.classList.remove('show');
-        setTimeout(() => {
-          popup.remove();
-          // If no more popups, fade title and status back in
-          if (messagesPopups && messagesPopups.children.length === 0) {
-            if (liveTitle) liveTitle.classList.remove('live-messages-fade');
-            if (status) status.classList.remove('live-messages-fade');
-          }
-        }, 500);
-      }, 5000);
-    }, 1100); // 1.1s delay to match fade out
   }
 
   async function fetchAndShowRecentMessages() {
-    if (!messagesPopups) return;
-    messagesPopups.innerHTML = '';
-    // Fetch last 5 messages, newest first
+    if (!spotlightCarousel) {
+      spotlightCarousel = new SpotlightCarousel();
+    }
+    
+    // Clear existing messages to prevent duplicates
+    spotlightCarousel.clearMessages();
+    
+    // Fetch last 10 messages, newest first
     const { data, error } = await supabase
       .from('messages')
       .select('*')
       .order('created_at', { ascending: false })
-      .limit(5);
-    if (data) {
-      // Show newest first (top)
-      data.reverse().forEach(msg => renderMessagePopup(msg));
+      .limit(10);
+      
+    if (data && data.length > 0) {
+      // Add messages to spotlight (they're already in newest-first order)
+      data.forEach(msg => {
+        spotlightCarousel.addMessage(msg);
+      });
     }
   }
 
@@ -530,11 +779,21 @@ document.addEventListener('DOMContentLoaded', function() {
   // --- Screen change logic for real-time messages ---
   function handleScreenChangeForMessages(screenName) {
     if (screenName === 'messages') {
-      if (messagesPopups) messagesPopups.innerHTML = '';
+      // Initialize carousel and fetch recent messages
+      if (!spotlightCarousel) {
+        spotlightCarousel = new SpotlightCarousel();
+      }
+      fetchAndShowRecentMessages();
       subscribeToMessages();
+      spotlightCarousel?.resume();
     } else {
+      // Clean up when leaving messages screen
       unsubscribeFromMessages();
-      if (messagesPopups) messagesPopups.innerHTML = '';
+      spotlightCarousel?.pause();
+      // Clear messages to prevent stale data when returning
+      if (spotlightCarousel) {
+        spotlightCarousel.clearMessages();
+      }
     }
   }
 

@@ -242,21 +242,49 @@
 
       <!-- Digital Photobooth Screen -->
       <div class="screen-container" data-screen="messages">
-        <div class="messages-container">
-          <h1 class="event-title" id="liveMessagesTitle">Character Showcase</h1>
-          <div class="messages-status" id="messagesStatus">
-            <div class="status-indicator improved-instructions">
-              <span class="status-text">
-                <span class="main-instruction">
-                  Watch as award recipients appear as their favorite book/movie characters on the LED main screen.
-                </span>
-                <span class="instruction-note">
-                  Submit your character photo and message in the "Submit Character" section to join the showcase.
-                </span>
-              </span>
+        <div class="spotlight-showcase-container">
+          <!-- Spotlight Carousel Layout -->
+          <div class="spotlight-layout">
+            <!-- Main Spotlight Area (70%) -->
+            <div class="spotlight-main">
+              <div class="spotlight-container" id="spotlightContainer">
+                <!-- Spotlight content will be dynamically inserted here -->
+                <div class="spotlight-placeholder">
+                  <div class="spotlight-placeholder-content">
+                    <div class="spotlight-placeholder-icon">🎭</div>
+                    <h3>Waiting for Character Submissions</h3>
+                    <p>Submit your character photo to see it featured here!</p>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Spotlight Controls -->
+              <div class="spotlight-controls">
+                <button class="spotlight-nav prev" id="spotlightPrev">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="15,18 9,12 15,6"/>
+                  </svg>
+                </button>
+                <div class="spotlight-indicators" id="spotlightIndicators"></div>
+                <button class="spotlight-nav next" id="spotlightNext">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="9,18 15,12 9,6"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+            
+            <!-- Recent Messages Queue (30%) -->
+            <div class="messages-queue">
+              <h3 class="queue-title">Recent Submissions</h3>
+              <div class="queue-container" id="messagesQueue">
+                <!-- Recent messages will be displayed here -->
+              </div>
             </div>
           </div>
-          <div id="messagesPopups"></div>
+          
+          <!-- Legacy popup container (hidden, for compatibility) -->
+          <div id="messagesPopups" style="display: none;"></div>
         </div>
       </div>
 
