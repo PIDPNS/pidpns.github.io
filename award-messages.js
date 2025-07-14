@@ -276,15 +276,15 @@ class AwardMessagesManager {
       console.log('Using supabase client for submission:', !!supabaseClient, 'with auth:', !!supabaseClient.auth);
 
       // Get form data
-      const userSelect = document.getElementById('userSelect');
+      const recipientNameInput = document.getElementById('recipientName');
       const messageInput = document.getElementById('messageInput');
       
-      const recipientName = userSelect.value;
+      const recipientName = recipientNameInput.value.trim();
       const message = messageInput.value.trim();
 
       // Validate required fields
       if (!recipientName) {
-        throw new Error('Please select a recipient name');
+        throw new Error('Please enter a recipient name');
       }
 
       if (!message) {
