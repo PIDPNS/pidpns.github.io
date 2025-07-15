@@ -572,8 +572,8 @@ document.addEventListener('DOMContentLoaded', function() {
         <div class="spotlight-placeholder">
           <div class="spotlight-placeholder-content">
             <div class="spotlight-placeholder-icon">🎭</div>
-            <h3>Waiting for Character Submissions</h3>
-            <p>Submit your character photo to see it featured here!</p>
+            <h3>Character Showcase Awaits</h3>
+            <p>Step into the spotlight! Share your movie or book character costume to join the digital showcase.</p>
           </div>
         </div>
       `;
